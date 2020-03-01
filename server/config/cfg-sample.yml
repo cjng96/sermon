@@ -1,0 +1,22 @@
+port: 25090
+domain: domain.com
+
+notification:
+  type: gmail
+  id: sermon@test.com
+  pw:
+  emails:
+    - sermon@test.com
+
+servers:
+  - name: local
+    url: localhost
+    id: admin
+    monitor:
+      - cpu
+      - load
+      - mem
+      - swap
+      - disk
+      - { type: app, name: app, status: /work/app/app.st }
+      - { type: app, name: appt, status: /work/appt/appt.st }

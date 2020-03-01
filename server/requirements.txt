@@ -1,0 +1,4 @@
+paramiko
+PyYAML
+aiohttp
+aiohttp-cors
