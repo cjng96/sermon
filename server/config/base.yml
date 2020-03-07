@@ -1,0 +1,8 @@
+
+servers:
+  - name: local
+    url: localhost
+
+notification:
+ - cjng96@gmail.com
+
