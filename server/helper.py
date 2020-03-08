@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-
+'''
+receive cmd via stdin, than output to stdout
+'''
 import json
 import asyncio
 import psutil
+import aiohttp
+from aiohttp import web
 
 def main():
   ss = input()
