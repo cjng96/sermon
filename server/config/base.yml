@@ -1,15 +1,19 @@
 
 servers:
-  - name: local
-    url: localhost
+  - name: tk1
+    url: tk1.synapbook.com
     id: cjng96
     monitor:
-      - type: docker
+      - cpu
+      - mem
+      - df
 
-  - name: ipn
-    url: localhost
+  - name: engs
+    url: tk1.synapbook.com
     id: cjng96
-    docker: ipn
+    docker: engs
+    apps:
+      - { name: eng, status: /tmp/eng.st }
 
 notification:
  - cjng96@gmail.com

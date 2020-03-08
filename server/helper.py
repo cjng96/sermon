@@ -6,8 +6,8 @@ import os, sys
 import json
 import asyncio
 import psutil
-import aiohttp
-from aiohttp import web
+#import aiohttp
+#from aiohttp import web
 
 def main():
   if len(sys.argv) < 2:
@@ -20,11 +20,16 @@ def main():
 
   pk = json.loads(ss)
 
-  cmd = pk['cmd']
-  if cmd == 'systemStatus':
-    dd = psutil.disk_usage('/')
-    st = dict(cpu=psutil.cpu_percent(), mem=psutil.virtual_memory()._asdict(), disk=dict(total=dd[0], used=dd[1], free=dd[2]))
-    print(json.dumps(st))
+  arr = pk['arr']
+  results = []
+  for item in arr:
+    cmd = item['cmd']
+    if cmd == 'systemStatus':
+      dd = psutil.disk_usage('/')
+      st = dict(cpu=psutil.cpu_percent(), mem=psutil.virtual_memory()._asdict(), disk=dict(total=dd[0], used=dd[1], free=dd[2]))
+      results.append(st)
+
+  print(json.dumps(results))
 
 if __name__ == "__main__":
   main()
