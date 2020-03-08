@@ -2,6 +2,7 @@
 '''
 receive cmd via stdin, than output to stdout
 '''
+import os, sys
 import json
 import asyncio
 import psutil
@@ -9,11 +10,15 @@ import aiohttp
 from aiohttp import web
 
 def main():
-  ss = input()
-  if ss.startswith('{'):
-    pk = json.loads(ss)
-  else:
-    pk=dict(cmd=ss)
+  if len(sys.argv) < 2:
+    print('missing argv')
+    return
+
+  pp = sys.argv[1]
+  with open(pp, 'r') as fp:
+    ss = fp.read()
+
+  pk = json.loads(ss)
 
   cmd = pk['cmd']
   if cmd == 'systemStatus':

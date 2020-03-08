@@ -2,10 +2,14 @@
 servers:
   - name: local
     url: localhost
+    id: cjng96
+    monitor:
+      - type: docker
 
   - name: ipn
     url: localhost
-    docker: 
+    id: cjng96
+    docker: ipn
 
 notification:
  - cjng96@gmail.com
