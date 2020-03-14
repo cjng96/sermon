@@ -3,6 +3,11 @@
 import yaml
 import time
 import json
+import threading
+import asyncio
+import aiohttp
+from aiohttp import web
+import async_timeout
 
 from coSsh import CoSsh
 from myutil import *
@@ -18,10 +23,6 @@ class Server:
     self.dockerId = None
     self.name = self.ser['name']
 
-  def isConnected(self):
-    return self.ssh is not None
-
-  def init(self):
     if 'docker' in self.ser:
       self.docker = self.ser['docker']
       if 'dockerId' in self.ser:
@@ -29,7 +30,12 @@ class Server:
       else:
         self.dockerId = self.ser['id']
 
+    self.thread = None
 
+  def isConnected(self):
+    return self.ssh is not None
+
+  def init(self):
     arr = self.ser['url'].split(':')
     host = arr[0]
     port = 22
@@ -38,16 +44,17 @@ class Server:
 
     ssh = CoSsh()
     ssh.init(host, port, self.ser['id'])
-    self.ssh = ssh
 
     ssh.uploadFile('./helper.py', '/tmp/sermon.py')
     ssh.run('chmod 755 /tmp/sermon.py')
 
+    self.ssh = ssh
+
     # TODO: virtual env
     if self.docker is None:
-      self.ssh.run('/usr/bin/pip3 install wheel psutil')
+      ssh.run('/usr/bin/pip3 install wheel psutil')
     else:
-      self.ssh.run('sudo docker cp /tmp/sermon.py {0}:/tmp/sermon.py'.format(self.docker))
+      ssh.run('sudo docker cp /tmp/sermon.py {0}:/tmp/sermon.py'.format(self.docker))
       self.dkRun('/usr/bin/pip3 install wheel psutil')
 
     return True
@@ -68,6 +75,75 @@ class Server:
       ss = self.dkRun('/tmp/sermon.py /tmp/sermon.cmd')
       return json.loads(ss)
 
+  def loop(self):
+    while True:
+      if not self.isConnected():
+        if not self.init():
+          continue
+
+      arr = []
+      arr.append(dict(cmd='systemStatus'))
+      result = self.run(dict(arr=arr))
+      print('result[%s] - %s' % (self.name, result))
+
+      time.sleep(10)
+
+  def threadStart(self):
+    self.thread = threading.Thread(target=self.loop)
+    self.thread.start()
+
+
+class Http:
+  def __init__(self, port, loop):
+    app = web.Application()
+    arr = [
+      web.get('/', lambda req: self.httpRoot(req)),
+      web.get('/cmd', lambda req: self.httpCmd(req)),
+      web.get('/ws', lambda req: self.httpWs(req)),
+    ]
+    app.add_routes(arr)
+
+    runner = web.AppRunner(app)
+    loop.run_until_complete(runner.setup())
+		#await runner.cleanup()
+
+    site = aiohttp.web.TCPSite(runner, "", port)
+    #self.log(1, 'http server - %d' % (port))
+    loop.run_until_complete(site.start())
+
+  def log(self, lv, ss, slack=None):
+    logProc(self.getLogName(), lv, ss, slack)
+
+  def logE(self, msg, e, slack=None):
+    logProcE(self.getLogName(), msg, e, slack)
+
+  
+  def httpRoot(self, req):
+    return web.Response(text="hello")
+
+  def httpCmd(self, req):
+    ss = await request.read()	# json
+    ss = ss.decode()
+    if ss == '':
+      return web.Response(status=500, text="invalid request")
+
+    print("http cmd ->", ss)
+    pk = json.loads(ss)
+    try:
+      tt = pk["type"]
+      if tt == 'test':
+        return web.Response("test")
+    except Error as e:
+      return web.Response(text=json.dumps(dict(err='error - %s' % e)))
+
+    except Exception as e:
+      print('exc - %s' % e)
+      return web.Response(text=json.dumps(dict(err='exception - %s' % e)))
+
+  def httpWs(self, req):
+    pass
+
+
 def main():
   with open('./config/base.yml', "r") as fp:
     ss = fp.read()
@@ -77,19 +153,15 @@ def main():
   for cc in cfg['servers']:
     ser = Server(cc)
     servers.append(ser)
+    ser.threadStart()
 
-  while True:
-    for ser in servers:
-      if not ser.isConnected():
-        if not ser.init():
-          continue
+  loop = asyncio.get_event_loop()
+  http = Http(25090, loop)
 
-      arr = []
-      arr.append(dict(cmd='systemStatus'))
-      result = ser.run(dict(arr=arr))
-      print('result[%s] - %s' % (ser.name, result))
-
-    time.sleep(10)
+  try:
+    loop.run_forever()
+  except KeyboardInterrupt:
+    pass
 
 if __name__ == "__main__":
   main()
