@@ -10,6 +10,7 @@ from aiohttp import web
 import async_timeout
 
 from coSsh import CoSsh
+from coLog import glog, Error
 from myutil import *
 
 servers = []
@@ -111,18 +112,17 @@ class Http:
     #self.log(1, 'http server - %d' % (port))
     loop.run_until_complete(site.start())
 
-  def log(self, lv, ss, slack=None):
-    logProc(self.getLogName(), lv, ss, slack)
+  def log(self, lv, ss, noti=None):
+    glog.log(lv, "http: %s" % ss, noti)
 
-  def logE(self, msg, e, slack=None):
-    logProcE(self.getLogName(), msg, e, slack)
-
+  def logE(self, msg, e, noti=None):
+    glog.exc("http: %s" % msg, e, noti)
   
   def httpRoot(self, req):
     return web.Response(text="hello")
 
-  def httpCmd(self, req):
-    ss = await request.read()	# json
+  async def httpCmd(self, req):
+    ss = await req.read()	# json
     ss = ss.decode()
     if ss == '':
       return web.Response(status=500, text="invalid request")
@@ -137,7 +137,7 @@ class Http:
       return web.Response(text=json.dumps(dict(err='error - %s' % e)))
 
     except Exception as e:
-      print('exc - %s' % e)
+      self.logE('exc - %s' % e, e)
       return web.Response(text=json.dumps(dict(err='exception - %s' % e)))
 
   def httpWs(self, req):
