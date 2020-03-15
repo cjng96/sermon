@@ -11,10 +11,12 @@ servers:
   - name: engs
     url: tk1.synapbook.com
     id: cjng96
-    docker: engs
+    dkName: engs
+    dkId: cjng96
     apps:
       - { name: eng, status: /tmp/eng.st }
 
 notification:
  - cjng96@gmail.com
 
+port: 25090

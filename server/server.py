@@ -23,6 +23,7 @@ class Server:
     self.docker = None
     self.dockerId = None
     self.name = self.ser['name']
+    print('server: %s[%s]' % (self.name, ser['url']))
 
     if 'docker' in self.ser:
       self.docker = self.ser['docker']
@@ -111,6 +112,7 @@ class Http:
     site = aiohttp.web.TCPSite(runner, "", port)
     #self.log(1, 'http server - %d' % (port))
     loop.run_until_complete(site.start())
+    self.log(1, "http: server start with port[%d]" % port)
 
   def log(self, lv, ss, noti=None):
     glog.log(lv, "http: %s" % ss, noti)
@@ -133,6 +135,8 @@ class Http:
       tt = pk["type"]
       if tt == 'test':
         return web.Response("test")
+      elif tt == 'status':
+        return web.Response('status')
     except Error as e:
       return web.Response(text=json.dumps(dict(err='error - %s' % e)))
 
@@ -150,14 +154,13 @@ def main():
 
   cfg = yaml.safe_load(ss)
 
+  loop = asyncio.get_event_loop()
+  http = Http(cfg['port'], loop)
+
   for cc in cfg['servers']:
     ser = Server(cc)
     servers.append(ser)
     ser.threadStart()
-
-  loop = asyncio.get_event_loop()
-  http = Http(25090, loop)
-
   try:
     loop.run_forever()
   except KeyboardInterrupt:
