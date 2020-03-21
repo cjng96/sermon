@@ -124,6 +124,19 @@ class Http:
     return web.Response(text="hello")
 
   async def httpCmd(self, req):
+    peername = req.transport.get_extra_info('peername')
+    host, port = peername
+    allowUse = False
+    if host.startswith('127.0.0.'):
+      allowUse = True
+    elif host.startswith('172.'):
+      # 172.16.0.0 ~ 172.31.255.255
+      n = int(host[4:host.index('.')+4])
+      if n >= 16 and n <= 31:
+        allowUse = True
+    if not allowUse:
+      return web.Response(status=500, text='You can\'t use this API')
+
     ss = await req.read()	# json
     ss = ss.decode()
     if ss == '':

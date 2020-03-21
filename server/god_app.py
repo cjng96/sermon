@@ -4,8 +4,9 @@ import string
 import random
 
 config = """
-name: sermon
 type: app
+name: sermon
+cmd: [ python3, server.py ]
 
 serve:
   patterns: [ "*.go", "*.yml", "*.graphql" ]
