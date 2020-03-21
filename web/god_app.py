@@ -5,8 +5,9 @@ import random
 import time
 
 config = """
-name: sermonWeb
 type: app
+name: sermonWeb
+cmd: [cmd, flutter, run, -d, chrome]
 
 serve:
   patterns: [ "*.dart" ]
@@ -46,9 +47,11 @@ class myGod:
   def buildTask(self, util, local, **kwargs):
     #local.gqlGen()
     #local.goBuild()
-    local.run("cmd flutter build web")    
+    pass
 
   def deployPreTask(self, util, remote, local, **_):
+    local.run("cmd flutter build web")
+
     # create new user with ssh key
     #remote.userNew(remote.server.owner, existOk=True, sshKey=True)
     #remote.run('sudo adduser {{remote.server.id}} {{remote.server.owner}}')
