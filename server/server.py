@@ -17,20 +17,22 @@ servers = []
 
 
 class Server:
-  def __init__(self, ser):
+  def __init__(self, cfg):
     self.ssh = None
-    self.ser = ser
+    self.cfg = cfg
     self.docker = None
     self.dockerId = None
-    self.name = self.ser['name']
-    print('server: %s[%s]' % (self.name, ser['url']))
+    self.name = self.cfg['name']
+    print('server: %s[%s]' % (self.name, cfg['url']))
 
-    if 'docker' in self.ser:
-      self.docker = self.ser['docker']
-      if 'dockerId' in self.ser:
-        self.dockerId = self.ser['dockerId']
+    self.statusSystem = None
+
+    if 'docker' in self.cfg:
+      self.docker = self.cfg['docker']
+      if 'dockerId' in self.cfg:
+        self.dockerId = self.cfg['dockerId']
       else:
-        self.dockerId = self.ser['id']
+        self.dockerId = self.cfg['id']
 
     self.thread = None
 
@@ -38,14 +40,14 @@ class Server:
     return self.ssh is not None
 
   def init(self):
-    arr = self.ser['url'].split(':')
+    arr = self.cfg['url'].split(':')
     host = arr[0]
     port = 22
     if len(arr) > 1:
       port = int(arr[1])
 
     ssh = CoSsh()
-    ssh.init(host, port, self.ser['id'])
+    ssh.init(host, port, self.cfg['id'])
 
     ssh.uploadFile('./helper.py', '/tmp/sermon.py')
     ssh.run('chmod 755 /tmp/sermon.py')
@@ -86,6 +88,7 @@ class Server:
       arr = []
       arr.append(dict(cmd='systemStatus'))
       result = self.run(dict(arr=arr))
+      self.statusSystem = result
       print('result[%s] - %s' % (self.name, result))
 
       time.sleep(10)
@@ -123,6 +126,13 @@ class Http:
   def httpRoot(self, req):
     return web.Response(text="hello")
 
+  async def cmdStatus(self, req):
+    result = []
+    for ser in servers:
+      result.append(dict(name=ser.name, system=ser.statusSystem))
+
+    return web.Response(text=json.dumps(result))
+
   async def httpCmd(self, req):
     peername = req.transport.get_extra_info('peername')
     host, port = peername
@@ -149,7 +159,7 @@ class Http:
       if tt == 'test':
         return web.Response("test")
       elif tt == 'status':
-        return web.Response('status')
+        return self.cmdStatus(req)
     except Error as e:
       return web.Response(text=json.dumps(dict(err='error - %s' % e)))
 
