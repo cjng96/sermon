@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import os
 import yaml
 import time
 import json
@@ -7,6 +8,7 @@ import threading
 import asyncio
 import aiohttp
 from aiohttp import web
+import aiohttp_cors
 import async_timeout
 
 from coSsh import CoSsh
@@ -91,7 +93,7 @@ class Server:
       self.statusSystem = result
       print('result[%s] - %s' % (self.name, result))
 
-      time.sleep(10)
+      time.sleep(30)
 
   def threadStart(self):
     self.thread = threading.Thread(target=self.loop)
@@ -103,10 +105,17 @@ class Http:
     app = web.Application()
     arr = [
       web.get('/', lambda req: self.httpRoot(req)),
-      web.get('/cmd', lambda req: self.httpCmd(req)),
+      #web.get('/cmd', lambda req: self.httpCmd(req)),
       web.get('/ws', lambda req: self.httpWs(req)),
     ]
     app.add_routes(arr)
+
+    # chrome에서 cors때문에 접속 안되는 문제
+    cors = aiohttp_cors.setup(app)
+    resCmd = cors.add(app.router.add_resource("/cmd"))
+    opt = aiohttp_cors.ResourceOptions(allow_credentials=False)
+    cors.add(resCmd.add_route("POST", lambda req: self.httpCmd(req)), {"*":	opt,})
+
 
     runner = web.AppRunner(app)
     loop.run_until_complete(runner.setup())
@@ -135,9 +144,13 @@ class Http:
 
   async def httpCmd(self, req):
     peername = req.transport.get_extra_info('peername')
-    host, port = peername
+    print('peername - %s' % (peername,))
+    host = peername[0]
+    port = peername[1]
     allowUse = False
     if host.startswith('127.0.0.'):
+      allowUse = True
+    elif host == '::1':
       allowUse = True
     elif host.startswith('172.'):
       # 172.16.0.0 ~ 172.31.255.255
@@ -159,7 +172,9 @@ class Http:
       if tt == 'test':
         return web.Response("test")
       elif tt == 'status':
-        return self.cmdStatus(req)
+        return await self.cmdStatus(req)
+      else:
+        raise Error('invalid cmd type[%s]' % tt)
     except Error as e:
       return web.Response(text=json.dumps(dict(err='error - %s' % e)))
 
@@ -169,6 +184,13 @@ class Http:
 
   def httpWs(self, req):
     pass
+
+# ctrl+c is not working on windows,(it's fixed in python 3.8)
+# https://stackoverflow.com/questions/27480967/why-does-the-asyncios-event-loop-suppress-the-keyboardinterrupt-on-windows
+# This restores the default Ctrl+C signal handler, which just kills the process
+if os.name == 'nt':
+  import signal
+  signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
 def main():
@@ -187,6 +209,7 @@ def main():
   try:
     loop.run_forever()
   except KeyboardInterrupt:
+    print('key interrupt')
     pass
 
 if __name__ == "__main__":
