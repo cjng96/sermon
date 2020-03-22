@@ -76,16 +76,14 @@ class CoSsh:
 
       try:
         line = chan.recv_stderr(99999)
-        if len(line) == 0:
-          isLoop = False
-        else:
+        if len(line) > 0:
           doOutput(False, line.decode("utf-8"), arg)
 
       except socket.timeout as e:
         pass
 
     ret = chan.recv_exit_status()
-    print("  -> ret:%d" % (ret))
+    print("  cmd:[%s] -> ret:%d" % (cmd, ret))
     chan.close()
     if ret != 0:
       #raise CalledProcessError("ssh command failed with ret:%d" % ret)
@@ -108,7 +106,7 @@ class CoSsh:
         print(' stderr: ', ss)
 
     self._run(cmd, doOutput, out)
-    print("  -> output:%s" % (out[0]))
+    print("  cmd:[%s] -> output:[%s]" % (cmd, out[0]))
     return out[0]
 
   def runOutputAll(self, cmd):
@@ -117,7 +115,7 @@ class CoSsh:
       arg[0] += ss
 
     self._run(cmd, doOutput, out)
-    print("  -> output:%s" % (out[0]))
+    print("  cmd:[%s] -> outputAll:[%s]" % (cmd, out[0]))
     return out[0]
 
   # sftp 상에 경로를 생성한다.
