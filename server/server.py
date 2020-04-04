@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import re
 import yaml
 import time
 import json
@@ -90,7 +91,7 @@ class Server:
       arr = []
       arr.append(dict(cmd='systemStatus'))
       result = self.run(dict(arr=arr))
-      self.statusSystem = result
+      self.statusSystem = result[0]
       print('result[%s] - %s' % (self.name, result))
 
       time.sleep(30)
@@ -154,7 +155,9 @@ class Http:
       allowUse = True
     elif host.startswith('172.'):
       # 172.16.0.0 ~ 172.31.255.255
-      n = int(host[4:host.index('.')+4])
+      m = re.search(r'^\d+\.(\d+)\.\d+\.\d+', host)
+      #n = int(host[4:host.index('.')+4])
+      n = int(m.group(1))
       if n >= 16 and n <= 31:
         allowUse = True
     if not allowUse:

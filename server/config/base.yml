@@ -16,6 +16,14 @@ servers:
     apps:
       - { name: eng, status: /tmp/eng.st }
 
+  - name: nj1
+    url: nj1.synapbook.com
+    id: cjng96
+    monitor:
+      - cpu
+      - mem
+      - df
+  
 notification:
  - cjng96@gmail.com
 
