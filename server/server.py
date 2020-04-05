@@ -84,22 +84,24 @@ class Server:
 
   def loop(self):
     while True:
-      if not self.isConnected():
-        if not self.init():
-          continue
+      try:
+        if not self.isConnected():
+          if not self.init():
+            continue
 
-      arr = []
-      arr.append(dict(cmd='systemStatus'))
-      result = self.run(dict(arr=arr))
-      self.statusSystem = result[0]
-      print('result[%s] - %s' % (self.name, result))
+        arr = []
+        arr.append(dict(cmd='systemStatus'))
+        result = self.run(dict(arr=arr))
+        self.statusSystem = result[0]
+        print('result[%s] - %s' % (self.name, result))
 
+      except Exception as e:
+        print('loop exc - ', e)
       time.sleep(30)
 
   def threadStart(self):
     self.thread = threading.Thread(target=self.loop)
     self.thread.start()
-
 
 class Http:
   def __init__(self, port, loop):
@@ -116,7 +118,6 @@ class Http:
     resCmd = cors.add(app.router.add_resource("/cmd"))
     opt = aiohttp_cors.ResourceOptions(allow_credentials=False)
     cors.add(resCmd.add_route("POST", lambda req: self.httpCmd(req)), {"*":	opt,})
-
 
     runner = web.AppRunner(app)
     loop.run_until_complete(runner.setup())
