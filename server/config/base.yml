@@ -6,15 +6,15 @@ servers:
     monitor:
       - cpu
       - mem
-      - df
+      - disk
 
   - name: engs
     url: tk1.synapbook.com
     id: cjng96
     dkName: engs
     dkId: cjng96
-    apps:
-      - { name: eng, status: /tmp/eng.st }
+    monitor:
+      - { type: app, name: eng, status: /tmp/eng.st }
 
   - name: nj1
     url: nj1.synapbook.com
@@ -22,7 +22,7 @@ servers:
     monitor:
       - cpu
       - mem
-      - df
+      - disk
   
 notification:
  - cjng96@gmail.com

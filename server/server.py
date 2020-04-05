@@ -8,6 +8,7 @@ import json
 import threading
 import asyncio
 import aiohttp
+import traceback
 from aiohttp import web
 import aiohttp_cors
 import async_timeout
@@ -23,19 +24,19 @@ class Server:
   def __init__(self, cfg):
     self.ssh = None
     self.cfg = cfg
-    self.docker = None
-    self.dockerId = None
+    self.dkName = None
+    self.dkId = None
     self.name = self.cfg['name']
     print('server: %s[%s]' % (self.name, cfg['url']))
 
-    self.statusSystem = None
+    self.status = None
 
-    if 'docker' in self.cfg:
-      self.docker = self.cfg['docker']
-      if 'dockerId' in self.cfg:
-        self.dockerId = self.cfg['dockerId']
+    if 'dkName' in self.cfg:
+      self.dkName = self.cfg['dkName']
+      if 'dkId' in self.cfg:
+        self.dkId = self.cfg['dkId']
       else:
-        self.dockerId = self.cfg['id']
+        self.dkId = self.cfg['id']
 
     self.thread = None
 
@@ -58,27 +59,28 @@ class Server:
     self.ssh = ssh
 
     # TODO: virtual env
-    if self.docker is None:
+    if self.dkName is None:
       ssh.run('/usr/bin/pip3 install wheel psutil')
     else:
-      ssh.run('sudo docker cp /tmp/sermon.py {0}:/tmp/sermon.py'.format(self.docker))
+      ssh.run('sudo docker cp /tmp/sermon.py {0}:/tmp/sermon.py'.format(self.dkName))
       self.dkRun('/usr/bin/pip3 install wheel psutil')
 
     return True
 
   def dkRun(self, cmd):
-    dkRunUser = '-u %s' % self.dockerId if self.dockerId is not None else ''
-    cmd = 'sudo docker exec -i %s %s %s' % (dkRunUser, self.docker, cmd)
+    dkRunUser = '-u %s' % self.dkId if self.dkId is not None else ''
+    cmd = 'sudo docker exec -i %s %s %s' % (dkRunUser, self.dkName, cmd)
     return self.ssh.runOutput(cmd)
 
   def run(self, pk):
-    if self.docker is None:
+    print('%s: cmd - %s' % (self.name, pk))
+    if self.dkName is None:
       makeFile(self.ssh, json.dumps(pk), '/tmp/sermon.cmd')
       ss = self.ssh.runOutput('/tmp/sermon.py /tmp/sermon.cmd')
       return json.loads(ss)
     else:
-      makeFile(self.ssh, json.dumps(pk), '/tmp/sermon_%s.cmd' % self.docker)
-      self.ssh.run('sudo docker cp /tmp/sermon_{0}.cmd {0}:/tmp/sermon.cmd'.format(self.docker))
+      makeFile(self.ssh, json.dumps(pk), '/tmp/sermon_%s.cmd' % self.dkName)
+      self.ssh.run('sudo docker cp /tmp/sermon_{0}.cmd {0}:/tmp/sermon.cmd'.format(self.dkName))
       ss = self.dkRun('/tmp/sermon.py /tmp/sermon.cmd')
       return json.loads(ss)
 
@@ -89,14 +91,12 @@ class Server:
           if not self.init():
             continue
 
-        arr = []
-        arr.append(dict(cmd='systemStatus'))
-        result = self.run(dict(arr=arr))
-        self.statusSystem = result[0]
-        print('result[%s] - %s' % (self.name, result))
+        #arr.append(dict(cmd='systemStatus'))
+        self.status = self.run(self.cfg['monitor'])
+        print('%s: result - %s' % (self.name, self.status))
 
       except Exception as e:
-        print('loop exc - ', e)
+        print('loop exc - ', traceback.format_exc())
       time.sleep(30)
 
   def threadStart(self):
@@ -140,7 +140,7 @@ class Http:
   async def cmdStatus(self, req):
     result = []
     for ser in servers:
-      result.append(dict(name=ser.name, system=ser.statusSystem))
+      result.append(dict(name=ser.name, status=ser.status))
 
     return web.Response(text=json.dumps(result))
 

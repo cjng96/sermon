@@ -34,8 +34,8 @@ Map<String, dynamic> _$StMemToJson(StMem instance) => <String, dynamic>{
       'percent': instance.percent
     };
 
-StSystem _$StSystemFromJson(Map<String, dynamic> json) {
-  return StSystem()
+StStatus _$StStatusFromJson(Map<String, dynamic> json) {
+  return StStatus()
     ..cpu = (json['cpu'] as num)?.toDouble()
     ..disk = json['disk'] == null
         ? null
@@ -45,7 +45,7 @@ StSystem _$StSystemFromJson(Map<String, dynamic> json) {
         : StMem.fromJson(json['mem'] as Map<String, dynamic>);
 }
 
-Map<String, dynamic> _$StSystemToJson(StSystem instance) => <String, dynamic>{
+Map<String, dynamic> _$StStatusToJson(StStatus instance) => <String, dynamic>{
       'cpu': instance.cpu,
       'disk': instance.disk?.toJson(),
       'mem': instance.mem?.toJson()
@@ -54,12 +54,12 @@ Map<String, dynamic> _$StSystemToJson(StSystem instance) => <String, dynamic>{
 Server _$ServerFromJson(Map<String, dynamic> json) {
   return Server()
     ..name = json['name'] as String
-    ..system = json['system'] == null
+    ..status = json['status'] == null
         ? null
-        : StSystem.fromJson(json['system'] as Map<String, dynamic>);
+        : StStatus.fromJson(json['status'] as Map<String, dynamic>);
 }
 
 Map<String, dynamic> _$ServerToJson(Server instance) => <String, dynamic>{
       'name': instance.name,
-      'system': instance.system?.toJson()
+      'status': instance.status?.toJson()
     };

@@ -43,8 +43,8 @@ class StDisk {
 
   String status() {
     final totGB = total / 1024/1024/1024;
-    final usedGB = used / 1024/1024/1024;
-    return '${usedGB.toStringAsFixed(1)}/${totGB.toStringAsFixed(1)}';
+    final freeGB = free / 1024/1024/1024;
+    return '${freeGB.toStringAsFixed(1)}/${totGB.toStringAsFixed(1)}';
   }
 
 }
@@ -62,16 +62,16 @@ class StMem {
 
   String status() {
     final totMB = (total / 1024/1024).round();
-    final usedMB = (used / 1024/1024).round();
-    return '$usedMB/$totMB';
+    final freeMB = (free / 1024/1024).round();
+    return '$freeMB/$totMB';
   }
 }
 
 @JsonSerializable(explicitToJson: true)
-class StSystem {
-  StSystem();
-  factory StSystem.fromJson(Map<String, dynamic> json) => _$StSystemFromJson(json);
-  Map<String, dynamic> toJson() => _$StSystemToJson(this);
+class StStatus {
+  StStatus();
+  factory StStatus.fromJson(Map<String, dynamic> json) => _$StStatusFromJson(json);
+  Map<String, dynamic> toJson() => _$StStatusToJson(this);
 
   double cpu;
   StDisk disk;
@@ -85,7 +85,7 @@ class Server {
   Map<String, dynamic> toJson() => _$ServerToJson(this);
 
   String name;
-  StSystem system;
+  StStatus status;
 }
 
 class _ServerStatusPageState extends State<ServerStatusPage> {
@@ -97,7 +97,6 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
   }
 
   Future<void> doStatus() async {
-    print('doStatus');
     var pk = {'type': 'status'};
     final ss = jsonEncode(pk);
 
@@ -106,18 +105,15 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
       url = 'https://sermon.mmx.kr/cmd';
     }
 
-    print('doStatus2');
     final res = await http.post(url, body: ss).timeout(const Duration(seconds: 30));
     if(res.statusCode != 200) {
       throw Exception('http error code - ${res.statusCode} - [${res.body}]');
     }
-    print('doStatus3 - ${res.body}');
     final map = json.decode(res.body) as List<dynamic>;
     List<Server> newServers = [];
     for(final item in map) {
       newServers.add(Server.fromJson(item as Map<String, dynamic>));
     }
-    print('doStatus4');
     servers = newServers;
     print('server - $servers');
   }
@@ -142,9 +138,17 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
         itemCount: servers.length,
         itemBuilder: (context, index) {
           final ser = servers[index];
+          var ss = '';
+          if(ser.status.cpu == null) {
+            ss = '${ser.name} - app';
+          } else {
+            ss = '${ser.name} - cpu: ${ser.status.cpu}, mem: ${ser.status.mem.status()}, disk: ${ser.status.disk.status()}';
+          }
+
           return ListTile(
-            title: Text('${ser.name} - cpu: ${ser.system.cpu}, mem:${ser.system.mem.status()}, disk:${ser.system.disk.status()}'),
+            title: Text(ss),
           );
+
         }
       ),
       floatingActionButton: FloatingActionButton(

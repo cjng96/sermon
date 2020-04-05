@@ -24,17 +24,30 @@ def main():
 
       log.write('cmd %s\n' % ss)
 
-      arr = pk['arr']
-      results = []
-      for item in arr:
-        cmd = item['cmd']
-        if cmd == 'systemStatus':
-          dd = psutil.disk_usage('/')
-          st = dict(cpu=psutil.cpu_percent(), mem=psutil.virtual_memory()._asdict(), disk=dict(total=dd[0], used=dd[1], free=dd[2]))
-          results.append(st)
+      result = {}
+      for item in pk:
+        if isinstance(item, str):
+          if item == 'cpu':
+            result[item] = psutil.cpu_percent()
+          elif item == 'mem':
+            result[item] = psutil.virtual_memory()._asdict()
+          elif item == 'disk':
+            dd = psutil.disk_usage('/')
+            result[item] = dict(total=dd[0], used=dd[1], free=dd[2])
+          else:
+            result[item] = 'unknown type[%s]' % item
+        elif isinstance(item, dict):
+          tt = item['type']
+          if tt == 'app':
+            if 'app' not in result:
+              result['app'] = dict()
 
-      log.write('result %s\n' % json.dumps(results))
-      print(json.dumps(results))
+            result['app'][item['name']] = 'not yet'
+        else:
+          result['err'] = 'unknown monitor data type[%s]!!' % type(item)
+
+      log.write('result %s\n' % json.dumps(result))
+      print(json.dumps(result))
     except Exception as e1:
       log.write('exc - %s' % e1)
 
