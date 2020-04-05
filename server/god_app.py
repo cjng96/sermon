@@ -100,12 +100,11 @@ allow 172.0.0.0/8; # docker''')
     remote.makeFile('''\
 [program:{{server.owner}}]
 user={{server.owner}}
-#command=dart lib/main.dart
-command={{deployRoot}}/current/server.py
+directory={{deployRoot}}/current/
+command=python3 -u server.py
 autostart=true
 autorestart=true
 stopasgroup=true
-directory=/home/%(program_name)s/current/
 environment=home="/home/%(program_name)s",LANG="en_US.UTF-8",LC_ALL="en_US.UTF-8"
 
 stderr_logfile=/var/log/supervisor/%(program_name)s_err.log
