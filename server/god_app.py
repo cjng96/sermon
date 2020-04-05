@@ -81,8 +81,8 @@ class myGod:
     proxyUrl = 'http://%s:%d' % (remote.server.dkName, env['port'])
     web = remote.otherDockerConn(remote.vars.webDocker, dkId=remote.server.dkId)
     my.setupWebApp(web, name=remote.server.owner, 
-      domain=remote.vars.domain, certAdminEmail='cjng96@gmail.com', root=remote.vars.root,
-      apiPath='/api', proxyUrl=proxyUrl, privateApi='/api/pcmd', privateFilter='''\
+      domain=remote.vars.domain, certAdminEmail='cjng96@gmail.com', root='%s/current' % remote.vars.root,
+      apiPath='/cmd', proxyUrl=proxyUrl, privateApi='/api/pcmd', privateFilter='''\
 allow 172.0.0.0/8; # docker''')
 
     # register ssh key of sermon

@@ -70,5 +70,7 @@ class myGod:
       fp.write(ss)
 
   def deployPostTask(self, util, remote, local, **_):
-    my.nginxWebSite(remote, name='sermon', domain=remote.vars.domain, certAdminEmail='cjng96@gmail.com', root='%s/current' % remote.server.deployRoot, cacheOn=True)
+    #my.nginxWebSite(remote, name='sermon', domain=remote.vars.domain, certAdminEmail='cjng96@gmail.com', root='%s/current' % remote.server.deployRoot, cacheOn=True)
+    pass
+  
 
