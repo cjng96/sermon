@@ -105,7 +105,7 @@ command=python3 -u server.py
 autostart=true
 autorestart=true
 stopasgroup=true
-environment=home="/home/%(program_name)s",LANG="en_US.UTF-8",LC_ALL="en_US.UTF-8"
+environment=HOME="/home/%(program_name)s",LANG="en_US.UTF-8",LC_ALL="en_US.UTF-8"
 
 stderr_logfile=/var/log/supervisor/%(program_name)s_err.log
 stdout_logfile=/var/log/supervisor/%(program_name)s_out.log
