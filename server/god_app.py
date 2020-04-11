@@ -9,7 +9,7 @@ name: sermon
 cmd: [ python3, server.py ]
 
 serve:
-  patterns: [ "*.go", "*.yml", "*.graphql" ]
+  patterns: [ "*.py" ]
 
 deploy:
   strategy: zip
