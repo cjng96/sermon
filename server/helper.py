@@ -40,9 +40,12 @@ def main():
           tt = item['type']
           if tt == 'app':
             if 'app' not in result:
-              result['app'] = dict()
+              result['apps'] = dict()
 
-            result['app'][item['name']] = 'not yet'
+            with open(item['status'], 'r') as fp:
+              ss = fp.read()
+            st = json.loads(ss)
+            result['apps'][item['name']] = st
         else:
           result['err'] = 'unknown monitor data type[%s]!!' % type(item)
 

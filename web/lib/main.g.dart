@@ -42,13 +42,15 @@ StStatus _$StStatusFromJson(Map<String, dynamic> json) {
         : StDisk.fromJson(json['disk'] as Map<String, dynamic>)
     ..mem = json['mem'] == null
         ? null
-        : StMem.fromJson(json['mem'] as Map<String, dynamic>);
+        : StMem.fromJson(json['mem'] as Map<String, dynamic>)
+    ..apps = json['apps'] as Map<String, dynamic>;
 }
 
 Map<String, dynamic> _$StStatusToJson(StStatus instance) => <String, dynamic>{
       'cpu': instance.cpu,
       'disk': instance.disk?.toJson(),
-      'mem': instance.mem?.toJson()
+      'mem': instance.mem?.toJson(),
+      'apps': instance.apps
     };
 
 Server _$ServerFromJson(Map<String, dynamic> json) {

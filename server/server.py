@@ -174,7 +174,7 @@ class Http:
     try:
       tt = pk["type"]
       if tt == 'test':
-        return web.Response("test")
+        return web.Response(text="test")
       elif tt == 'status':
         return await self.cmdStatus(req)
       else:

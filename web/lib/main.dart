@@ -76,6 +76,7 @@ class StStatus {
   double cpu;
   StDisk disk;
   StMem mem;
+  Map<String, dynamic> apps;
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -140,7 +141,11 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
           final ser = servers[index];
           var ss = '';
           if(ser.status.cpu == null) {
-            ss = '${ser.name} - app';
+            ss = '${ser.name} - ';
+            final apps = ser.status.apps;
+            for(var app in apps.keys) {
+              ss += '$app: ${apps[app]['ts']} ';
+            }
           } else {
             ss = '${ser.name} - cpu: ${ser.status.cpu}, mem: ${ser.status.mem.status()}, disk: ${ser.status.disk.status()}';
           }
