@@ -134,10 +134,10 @@ class Server {
       lst.add(StItem('mem', '${status.mem.status()}', false));
     }
     if(status.swap != null) {
-      lst.add(StItem('swap', '${status.swap.status()}', false));
+      lst.add(StItem('swap', '${status.swap.status()}', status.swap.percent > 90));
     }
     if(status.disk != null) {
-      lst.add(StItem('disk', '${status.disk.status()}', false));
+      lst.add(StItem('disk', '${status.disk.status()}', status.disk.free < 1024*1024*1024*5));
     }
 
     if(status.apps != null) {
@@ -146,7 +146,7 @@ class Server {
         final ts = apps[app]['ts'];
         final now = DateTime.now().millisecondsSinceEpoch/1000;
         final d = Duration(seconds: (now-ts).round());
-        lst.add(StItem(app, '${duration2str(d)}', d.inSeconds > 10));
+        lst.add(StItem(app, '${duration2str(d)}', d.inSeconds > 60));
       }
     }
     return lst;
