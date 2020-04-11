@@ -79,6 +79,31 @@ class StStatus {
   Map<String, dynamic> apps;
 }
 
+class StItem {
+  String name;
+  String status;
+  bool alertFlag;
+
+  StItem(this.name, this.status, this.alertFlag);
+}
+
+String duration2str(Duration d) {
+  String td(int n) {
+    if (n >= 10) return "$n";
+    return "0$n";
+  }
+
+  String ss = '${td(d.inMinutes.remainder(60))}:${td(d.inSeconds.remainder(60))}';
+  if(d.inDays != 0 || d.inHours != 0) {
+    ss = '${td(d.inHours)}:'+ss;
+    if(d.inDays != 0) {
+      ss = '${d.inDays}D ' + ss;
+    }
+  }
+
+  return ss;
+}
+
 @JsonSerializable(explicitToJson: true)
 class Server {
   Server();
@@ -87,6 +112,31 @@ class Server {
 
   String name;
   StStatus status;
+
+  List<StItem> getStatus() {
+    final lst = List<StItem>();
+    if(status.cpu != null) {
+      lst.add(StItem('cpu', '${status.cpu}', status.cpu > 80));
+    }
+    if(status.mem != null) {
+      lst.add(StItem('mem', '${status.mem.status()}', false));
+    }
+    if(status.disk != null) {
+      lst.add(StItem('disk', '${status.disk.status()}', false));
+    }
+
+    if(status.apps != null) {
+      final apps = status.apps;
+      for(var app in apps.keys) {
+        final ts = apps[app]['ts'];
+        final now = DateTime.now().millisecondsSinceEpoch/1000;
+        final d = Duration(seconds: (now-ts).round());
+        lst.add(StItem(app, '${duration2str(d)}', d.inSeconds > 10));
+      }
+    }
+    return lst;
+  }
+
 }
 
 class _ServerStatusPageState extends State<ServerStatusPage> {
@@ -138,20 +188,18 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
       body: ListView.builder(
         itemCount: servers.length,
         itemBuilder: (context, index) {
-          final ser = servers[index];
-          var ss = '';
-          if(ser.status.cpu == null) {
-            ss = '${ser.name} - ';
-            final apps = ser.status.apps;
-            for(var app in apps.keys) {
-              ss += '$app: ${apps[app]['ts']} ';
-            }
-          } else {
-            ss = '${ser.name} - cpu: ${ser.status.cpu}, mem: ${ser.status.mem.status()}, disk: ${ser.status.disk.status()}';
+          final lstSt = servers[index].getStatus();
+          final lst = List<Widget>();
+          lst.add(Text('${servers[index].name} - '));
+          for(var item in lstSt) {
+            final txt = Text('${item.name}: ${item.status} ', 
+              textAlign: TextAlign.left,
+              style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black));
+            lst.add(txt);
           }
 
           return ListTile(
-            title: Text(ss),
+            title: Row(children: lst),
           );
 
         }
