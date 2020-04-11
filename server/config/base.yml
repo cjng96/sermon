@@ -6,6 +6,7 @@ servers:
     monitor:
       - cpu
       - mem
+      - swap
       - disk
 
   - name: engs
@@ -22,6 +23,7 @@ servers:
     monitor:
       - cpu
       - mem
+      - swap
       - disk
   
 notification:

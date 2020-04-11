@@ -44,9 +44,8 @@ class StDisk {
   String status() {
     final totGB = total / 1024/1024/1024;
     final freeGB = free / 1024/1024/1024;
-    return '${freeGB.toStringAsFixed(1)}/${totGB.toStringAsFixed(1)}';
+    return '${freeGB.toStringAsFixed(1)}G/${totGB.toStringAsFixed(1)}G';
   }
-
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -55,18 +54,30 @@ class StMem {
   factory StMem.fromJson(Map<String, dynamic> json) => _$StMemFromJson(json);
   Map<String, dynamic> toJson() => _$StMemToJson(this);
 
-  int free;
+
   int total;
-  int used;
   double percent;
 
   String status() {
     final totMB = (total / 1024/1024).round();
-    final freeMB = (free / 1024/1024).round();
-    return '$freeMB/$totMB';
+    return '$percent%(${totMB}MB)';
   }
 }
 
+@JsonSerializable(explicitToJson: true)
+class StSwap {
+  StSwap();
+  factory StSwap.fromJson(Map<String, dynamic> json) => _$StSwapFromJson(json);
+  Map<String, dynamic> toJson() => _$StSwapToJson(this);
+
+  int total;
+  double percent;
+
+  String status() {
+    final totMB = (total / 1024/1024).round();
+    return '$percent%(${totMB}MB)';
+  }
+}
 @JsonSerializable(explicitToJson: true)
 class StStatus {
   StStatus();
@@ -76,6 +87,7 @@ class StStatus {
   double cpu;
   StDisk disk;
   StMem mem;
+  StSwap swap;
   Map<String, dynamic> apps;
 }
 
@@ -121,6 +133,9 @@ class Server {
     if(status.mem != null) {
       lst.add(StItem('mem', '${status.mem.status()}', false));
     }
+    if(status.swap != null) {
+      lst.add(StItem('swap', '${status.swap.status()}', false));
+    }
     if(status.disk != null) {
       lst.add(StItem('disk', '${status.disk.status()}', false));
     }
@@ -161,10 +176,14 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
       throw Exception('http error code - ${res.statusCode} - [${res.body}]');
     }
     final map = json.decode(res.body) as List<dynamic>;
+    print('map - ${map}');
+
+
     List<Server> newServers = [];
     for(final item in map) {
       newServers.add(Server.fromJson(item as Map<String, dynamic>));
     }
+    print('new ser - ${newServers[0].status.mem}');
     servers = newServers;
     print('server - $servers');
   }

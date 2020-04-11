@@ -21,18 +21,21 @@ Map<String, dynamic> _$StDiskToJson(StDisk instance) => <String, dynamic>{
 
 StMem _$StMemFromJson(Map<String, dynamic> json) {
   return StMem()
-    ..free = json['free'] as int
     ..total = json['total'] as int
-    ..used = json['used'] as int
     ..percent = (json['percent'] as num)?.toDouble();
 }
 
-Map<String, dynamic> _$StMemToJson(StMem instance) => <String, dynamic>{
-      'free': instance.free,
-      'total': instance.total,
-      'used': instance.used,
-      'percent': instance.percent
-    };
+Map<String, dynamic> _$StMemToJson(StMem instance) =>
+    <String, dynamic>{'total': instance.total, 'percent': instance.percent};
+
+StSwap _$StSwapFromJson(Map<String, dynamic> json) {
+  return StSwap()
+    ..total = json['total'] as int
+    ..percent = (json['percent'] as num)?.toDouble();
+}
+
+Map<String, dynamic> _$StSwapToJson(StSwap instance) =>
+    <String, dynamic>{'total': instance.total, 'percent': instance.percent};
 
 StStatus _$StStatusFromJson(Map<String, dynamic> json) {
   return StStatus()
@@ -43,6 +46,9 @@ StStatus _$StStatusFromJson(Map<String, dynamic> json) {
     ..mem = json['mem'] == null
         ? null
         : StMem.fromJson(json['mem'] as Map<String, dynamic>)
+    ..swap = json['swap'] == null
+        ? null
+        : StSwap.fromJson(json['swap'] as Map<String, dynamic>)
     ..apps = json['apps'] as Map<String, dynamic>;
 }
 
@@ -50,6 +56,7 @@ Map<String, dynamic> _$StStatusToJson(StStatus instance) => <String, dynamic>{
       'cpu': instance.cpu,
       'disk': instance.disk?.toJson(),
       'mem': instance.mem?.toJson(),
+      'swap': instance.swap?.toJson(),
       'apps': instance.apps
     };
 

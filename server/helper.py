@@ -30,7 +30,11 @@ def main():
           if item == 'cpu':
             result[item] = psutil.cpu_percent()
           elif item == 'mem':
-            result[item] = psutil.virtual_memory()._asdict()
+            vm = psutil.virtual_memory()  # _asdict()
+            result[item] = dict(percent=vm.percent, total=vm.total)
+          elif item == 'swap':
+            swap = psutil.swap_memory()
+            result[item] = dict(percent=swap.percent, total=swap.total)
           elif item == 'disk':
             dd = psutil.disk_usage('/')
             result[item] = dict(total=dd[0], used=dd[1], free=dd[2])
