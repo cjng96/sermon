@@ -43,12 +43,16 @@ def main():
         elif isinstance(item, dict):
           tt = item['type']
           if tt == 'app':
-            if 'app' not in result:
+            if 'apps' not in result:
               result['apps'] = dict()
 
-            with open(item['status'], 'r') as fp:
-              ss = fp.read()
-            st = json.loads(ss)
+            try:
+              with open(item['status'], 'r') as fp:
+                ss = fp.read()
+              st = json.loads(ss)
+            except Exception as e:
+              st = dict(err=str(e))
+
             result['apps'][item['name']] = st
         else:
           result['err'] = 'unknown monitor data type[%s]!!' % type(item)

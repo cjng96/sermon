@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -44,8 +43,8 @@ class StDisk {
 
   String status() {
     final totGB = total / 1024/1024/1024;
-    final freeGB = free / 1024/1024/1024;
-    return '${freeGB.toStringAsFixed(1)}G/${totGB.toStringAsFixed(1)}G';
+    final usedGB = used / 1024/1024/1024;
+    return '${usedGB.toStringAsFixed(1)}G/${totGB.toStringAsFixed(1)}G';
   }
 }
 
@@ -144,10 +143,14 @@ class Server {
     if(status.apps != null) {
       final apps = status.apps;
       for(var app in apps.keys) {
-        final ts = apps[app]['ts'];
-        final now = DateTime.now().millisecondsSinceEpoch/1000;
-        final d = Duration(seconds: (now-ts).round());
-        lst.add(StItem(app, '${duration2str(d)}', d.inSeconds > 60));
+        if(apps[app].containsKey('err')) {
+          lst.add(StItem(app, apps[app]['err'], true));
+        } else {
+          final ts = apps[app]['ts'];
+          final now = DateTime.now().millisecondsSinceEpoch/1000;
+          final d = Duration(seconds: (now-ts).round());
+          lst.add(StItem(app, '${duration2str(d)}', d.inSeconds > 60));
+        }
       }
     }
     return lst;
@@ -177,7 +180,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
       throw Exception('http error code - ${res.statusCode} - [${res.body}]');
     }
     final map = json.decode(res.body) as List<dynamic>;
-    print('map - ${map}');
+    print('map - $map');
 
 
     List<Server> newServers = [];
