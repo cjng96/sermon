@@ -16,6 +16,7 @@ servers:
     dkId: cjng96
     monitor:
       - { type: app, name: engt, status: /tmp/engt.st }
+      - { type: app, name: eng, status: /tmp/eng.st }
 
   - name: nj1
     url: nj1.synapbook.com
