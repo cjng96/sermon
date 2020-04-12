@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -128,7 +129,7 @@ class Server {
   List<StItem> getStatus() {
     final lst = List<StItem>();
     if(status.cpu != null) {
-      lst.add(StItem('cpu', '${status.cpu}', status.cpu > 80));
+      lst.add(StItem('cpu', '${status.cpu}%', status.cpu > 80));
     }
     if(status.mem != null) {
       lst.add(StItem('mem', '${status.mem.status()}', false));
@@ -189,7 +190,10 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
   }
 
   void _initCode() async {
-    await _refresh();
+    while(true) {
+      await _refresh();
+      await Future.delayed(Duration(seconds: 5));
+    }
   }
 
   @override
