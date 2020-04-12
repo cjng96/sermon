@@ -15,7 +15,7 @@ servers:
     dkName: engs
     dkId: cjng96
     monitor:
-      - { type: app, name: eng, status: /tmp/engt.st }
+      - { type: app, name: engt, status: /tmp/engt.st }
 
   - name: nj1
     url: nj1.synapbook.com
@@ -25,7 +25,16 @@ servers:
       - mem
       - swap
       - disk
-  
+    
+  - name: aws1
+    url: aws1.synapbook.com
+    id: cjng96
+    monitor:
+      - cpu
+      - mem
+      - swap
+      - disk
+      
 notification:
  - cjng96@gmail.com
 
