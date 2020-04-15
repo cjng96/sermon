@@ -207,6 +207,9 @@ def main():
   http = Http(cfg['port'], loop)
 
   for cc in cfg['servers']:
+    if 'name' not in cc:
+      continue
+    
     ser = Server(cc)
     servers.append(ser)
     ser.threadStart()
