@@ -68,7 +68,6 @@ class StMem {
   factory StMem.fromJson(Map<String, dynamic> json) => _$StMemFromJson(json);
   Map<String, dynamic> toJson() => _$StMemToJson(this);
 
-
   int total;
   double percent;
 
@@ -107,11 +106,14 @@ class StStatus {
 }
 
 class StItem {
+  bool groupFlag;
   String name;
   String status;
   bool alertFlag;
 
-  StItem(this.name, this.status, this.alertFlag);
+  List<StItem> lst;
+
+  StItem(this.groupFlag, this.name, this.status, this.alertFlag);
 }
 
 String duration2str(Duration d) {
@@ -143,31 +145,37 @@ class Server {
   List<StItem> getStatus() {
     final lst = List<StItem>();
     if(status.cpu != null) {
-      lst.add(StItem('cpu', '${status.cpu}%', status.cpu > 80));
+      lst.add(StItem(false, 'cpu', '${status.cpu}%', status.cpu > 80));
     }
     if(status.load != null) {
-      lst.add(StItem('load', '${status.load.status()}', false));
+      lst.add(StItem(false, 'load', '${status.load.status()}', false));
     }
     if(status.mem != null) {
-      lst.add(StItem('mem', '${status.mem.status()}', false));
+      lst.add(StItem(false, 'mem', '${status.mem.status()}', false));
     }
     if(status.swap != null) {
-      lst.add(StItem('swap', '${status.swap.status()}', status.swap.percent > 90));
+      lst.add(StItem(false, 'swap', '${status.swap.status()}', status.swap.percent > 90));
     }
     if(status.disk != null) {
-      lst.add(StItem('disk', '${status.disk.status()}', status.disk.free < 1024*1024*1024*5));
+      lst.add(StItem(false, 'disk', '${status.disk.status()}', status.disk.free < 1024*1024*1024*5));
     }
 
     if(status.apps != null) {
       final apps = status.apps;
-      for(var app in apps.keys) {
-        if(apps[app].containsKey('err')) {
-          lst.add(StItem(app, apps[app]['err'], true));
+      for(var appName in apps.keys) {
+        final appSt = StItem(true, appName, '', false);
+        lst.add(appSt);
+
+        final subList = List<StItem>();
+        appSt.lst = subList;
+        final app = apps[appName];
+        if(app.containsKey('err')) {
+          subList.add(StItem(false, 'err', app['err'], true));
         } else {
-          final ts = apps[app]['ts'];
+          final ts = apps[appName]['ts'];
           final now = DateTime.now().millisecondsSinceEpoch/1000;
           final d = Duration(seconds: (now-ts).round());
-          lst.add(StItem(app, '${duration2str(d)}', d.inSeconds > 60));
+          subList.add(StItem(false, 'alive', '${duration2str(d)}', d.inSeconds > 60));
         }
       }
     }
@@ -235,17 +243,46 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
           final lstSt = servers[index].getStatus();
           final lst = List<Widget>();
           lst.add(Text('${servers[index].name} - '));
+          final lstGroup = <Widget>[];
           for(var item in lstSt) {
-            final txt = Text('${item.name}: ${item.status} ', 
-              textAlign: TextAlign.left,
-              style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black));
-            lst.add(txt);
+            if(item.groupFlag) {
+              final children = <Widget>[];
+              children.add(Text('  ${item.name} -> ', textAlign: TextAlign.left));
+
+
+              final lstRows = <Widget>[]; // 별도 행으로 표시할 아이템은 여기에
+              for(var subItem in item.lst) {
+                final txt = Text('${subItem.name}: ${subItem.status}', textAlign: TextAlign.left,
+                  style: TextStyle(color: subItem.alertFlag ? Colors.red : Colors.black));
+                children.add(txt);
+              }
+              //lstRows.add(Text('haha'));
+
+              if(lstRows.length > 0) {
+                lstRows.insert(0, Row(children: children));
+                lstGroup.add(Column(children: lstRows));
+              } else {
+                lstGroup.add(Row(children: children));
+
+              }
+            } else {
+              final txt = Text('${item.name}: ${item.status} ', 
+                textAlign: TextAlign.left,
+                style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black));
+              lst.add(txt);
+            }
           }
 
-          return ListTile(
-            title: Row(children: lst),
-          );
-
+          if(lstGroup.length == 0) {
+            return ListTile(
+              title: Row(children: lst),
+            );
+          } else {
+            lstGroup.insert(0, Row(children: lst));
+            return ListTile(
+              title: Column(children: lstGroup),
+            );
+          }
         }
       ),
       floatingActionButton: FloatingActionButton(
