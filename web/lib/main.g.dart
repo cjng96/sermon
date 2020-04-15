@@ -6,6 +6,15 @@ part of 'main.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+StLoadAvg _$StLoadAvgFromJson(Map<String, dynamic> json) {
+  return StLoadAvg()
+    ..cnt = json['cnt'] as int
+    ..avg = (json['avg'] as List)?.map((e) => (e as num)?.toDouble())?.toList();
+}
+
+Map<String, dynamic> _$StLoadAvgToJson(StLoadAvg instance) =>
+    <String, dynamic>{'cnt': instance.cnt, 'avg': instance.avg};
+
 StDisk _$StDiskFromJson(Map<String, dynamic> json) {
   return StDisk()
     ..free = json['free'] as int
@@ -40,6 +49,9 @@ Map<String, dynamic> _$StSwapToJson(StSwap instance) =>
 StStatus _$StStatusFromJson(Map<String, dynamic> json) {
   return StStatus()
     ..cpu = (json['cpu'] as num)?.toDouble()
+    ..load = json['load'] == null
+        ? null
+        : StLoadAvg.fromJson(json['load'] as Map<String, dynamic>)
     ..disk = json['disk'] == null
         ? null
         : StDisk.fromJson(json['disk'] as Map<String, dynamic>)
@@ -54,6 +66,7 @@ StStatus _$StStatusFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$StStatusToJson(StStatus instance) => <String, dynamic>{
       'cpu': instance.cpu,
+      'load': instance.load?.toJson(),
       'disk': instance.disk?.toJson(),
       'mem': instance.mem?.toJson(),
       'swap': instance.swap?.toJson(),

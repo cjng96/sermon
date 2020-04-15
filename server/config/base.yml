@@ -5,6 +5,7 @@ servers:
     id: cjng96
     monitor:
       - cpu
+      - load
       - mem
       - swap
       - disk
@@ -23,6 +24,7 @@ servers:
     id: cjng96
     monitor:
       - cpu
+      - load
       - mem
       - swap
       - disk
@@ -32,6 +34,7 @@ servers:
     id: cjng96
     monitor:
       - cpu
+      - load
       - mem
       - swap
       - disk

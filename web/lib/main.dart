@@ -32,6 +32,20 @@ class ServerStatusPage extends StatefulWidget {
 }
 
 @JsonSerializable(explicitToJson: true)
+class StLoadAvg {
+  StLoadAvg();
+  factory StLoadAvg.fromJson(Map<String, dynamic> json) => _$StLoadAvgFromJson(json);
+  Map<String, dynamic> toJson() => _$StLoadAvgToJson(this);
+
+  int cnt;
+  List<double> avg;
+
+  String status() {
+    return '[$cnt] ${avg[0].toStringAsFixed(1)},${avg[1].toStringAsFixed(1)},${avg[2].toStringAsFixed(1)}';
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class StDisk {
   StDisk();
   factory StDisk.fromJson(Map<String, dynamic> json) => _$StDiskFromJson(json);
@@ -85,6 +99,7 @@ class StStatus {
   Map<String, dynamic> toJson() => _$StStatusToJson(this);
 
   double cpu;
+  StLoadAvg load;
   StDisk disk;
   StMem mem;
   StSwap swap;
@@ -129,6 +144,9 @@ class Server {
     final lst = List<StItem>();
     if(status.cpu != null) {
       lst.add(StItem('cpu', '${status.cpu}%', status.cpu > 80));
+    }
+    if(status.load != null) {
+      lst.add(StItem('load', '${status.load.status()}', false));
     }
     if(status.mem != null) {
       lst.add(StItem('mem', '${status.mem.status()}', false));

@@ -29,6 +29,8 @@ def main():
         if isinstance(item, str):
           if item == 'cpu':
             result[item] = psutil.cpu_percent()
+          elif item == 'load':
+            result[item] = dict(cnt=psutil.cpu_count(), avg=psutil.getloadavg())
           elif item == 'mem':
             vm = psutil.virtual_memory()  # _asdict()
             result[item] = dict(percent=vm.percent, total=vm.total)
