@@ -67,6 +67,62 @@ class Server:
 
     return True
 
+  def getStatus(self):
+    '''
+    name: SERVER_NAME
+    items:
+      - name: cpu
+        v: 99%
+        alertFlag: True
+
+    groups:
+      - name: engt
+        lst:
+          - name: err
+            v: Error occurs
+            alertFlag: True
+          - name: ts
+            v: 00:21
+            alertFlag: False
+
+    '''
+    items = []
+    groups = []
+    for item in self.cfg['monitor']:
+      if type(item) == str:
+        vv = self.status[item]
+        if item == 'cpu':
+          items.append(dict(name=item, v='%d%%' % vv, alertFlag=vv > 80))
+        elif item == 'load':
+          st = '[%d] %.1f,%.1f,%.1f' % (vv['cnt'], vv['avg'][0], vv['avg'][1], vv['avg'][2])
+          items.append(dict(name=item, v=st, alertFlag=False))
+        elif item == 'mem':
+          st = '%d%%(%dMB)' % (vv['percent'], int(vv['total']/1024/1024))
+          items.append(dict(name=item, v=st, alertFlag=vv['percent'] > 90))
+        elif item == 'swap':
+          st = '%d%%(%dMB)' % (vv['percent'], int(vv['total']/1024/1024))
+          items.append(dict(name=item, v=st, alertFlag=vv['percent'] > 90))
+        elif item == 'disk':
+          st = '%dG/%dG' % (vv['used']/1024/1024/1024, vv['total']/1024/1024/1024)
+          items.append(dict(name=item, v=st, alertFlag=vv['free'] < 1024*1024*1024*5))
+        else:
+          print('unknown item[%s]' % item)
+
+      elif type(item) == dict:
+        if item['type'] == 'app':
+          name = item['name']
+          vv = self.status['apps'][name]
+          lst = []
+          if 'err' in vv:
+            lst.append(dict(name='err', v=vv['err'], alertFlag=True))
+          if 'ts' in vv:
+            ts = vv['ts']
+            lst.append(dict(name='ts', v=ts, alertFlag=time.time() - ts > 60))
+
+          groups.append(dict(name=name, lst=lst))
+
+    return dict(name=self.name, items=items, groups=groups)
+
   def dkRun(self, cmd):
     dkRunUser = '-u %s' % self.dkId if self.dkId is not None else ''
     cmd = 'sudo docker exec -i %s %s %s' % (dkRunUser, self.dkName, cmd)
@@ -140,7 +196,7 @@ class Http:
   async def cmdStatus(self, req):
     result = []
     for ser in servers:
-      result.append(dict(name=ser.name, status=ser.status))
+      result.append(ser.getStatus())
 
     return web.Response(text=json.dumps(result))
 
@@ -161,8 +217,10 @@ class Http:
       n = int(m.group(1))
       if n >= 16 and n <= 31:
         allowUse = True
+    elif host.startswith('192.168.'): #
+      allowUse = True
     if not allowUse:
-      return web.Response(status=500, text='You can\'t use this API')
+      return web.Response(status=500, text='You can\'t use this API from %s' % host)
 
     ss = await req.read()	# json
     ss = ss.decode()
