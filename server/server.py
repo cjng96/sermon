@@ -19,6 +19,16 @@ from myutil import *
 
 servers = []
 
+'''
+http post localhost:25090/cmd type=status
+'''
+
+class MyCoSsh(CoSsh):
+  def __init__(self, name):
+    self.name = name
+
+  def log(self, lv, msg):
+    print('%d) %s - %s' % (lv, self.name, msg))
 
 class Server:
   def __init__(self, cfg):
@@ -50,7 +60,7 @@ class Server:
     if len(arr) > 1:
       port = int(arr[1])
 
-    ssh = CoSsh()
+    ssh = MyCoSsh(self.name)
     ssh.init(host, port, self.cfg['id'])
 
     ssh.uploadFile('./helper.py', '/tmp/sermon.py')
@@ -117,9 +127,9 @@ class Server:
             lst.append(dict(name='err', v=vv['err'], alertFlag=True))
           if 'ts' in vv:
             ts = vv['ts']
-            lst.append(dict(name='ts', v=ts, alertFlag=time.time() - ts > 60))
+            lst.append(dict(name='ts', v=str(ts), alertFlag=time.time() - ts > 60))
 
-          groups.append(dict(name=name, lst=lst))
+          groups.append(dict(name=name, items=lst))
 
     return dict(name=self.name, items=items, groups=groups)
 
@@ -202,7 +212,7 @@ class Http:
 
   async def httpCmd(self, req):
     peername = req.transport.get_extra_info('peername')
-    print('peername - %s' % (peername,))
+    #print('peername - %s' % (peername,))
     host = peername[0]
     port = peername[1]
     allowUse = False

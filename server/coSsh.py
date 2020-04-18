@@ -57,6 +57,9 @@ class CoSsh:
     if hasattr(self, "ssh"):
       self.ssh.close()
 
+  def log(self, lv, msg):
+    print('%d) %s' % (lv, msg))
+
   def _run(self, cmd, doOutput, arg):
     chan = self.ssh.get_transport().open_session()
     #chan.get_pty()
@@ -83,7 +86,7 @@ class CoSsh:
         pass
 
     ret = chan.recv_exit_status()
-    print("  cmd:[%s] -> ret:%d" % (cmd, ret))
+    self.log(1, "  cmd:[%s] -> ret:%d" % (cmd, ret))
     chan.close()
     if ret != 0:
       #raise CalledProcessError("ssh command failed with ret:%d" % ret)
@@ -106,7 +109,7 @@ class CoSsh:
         print(' stderr: ', ss)
 
     self._run(cmd, doOutput, out)
-    print("  cmd:[%s] -> output:[%s]" % (cmd, out[0]))
+    self.log(1, "  cmd:[%s] -> output:[%s]" % (cmd, out[0]))
     return out[0]
 
   def runOutputAll(self, cmd):
@@ -115,7 +118,7 @@ class CoSsh:
       arg[0] += ss
 
     self._run(cmd, doOutput, out)
-    print("  cmd:[%s] -> outputAll:[%s]" % (cmd, out[0]))
+    self.log(1, "  cmd:[%s] -> outputAll:[%s]" % (cmd, out[0]))
     return out[0]
 
   # sftp 상에 경로를 생성한다.
@@ -142,7 +145,7 @@ class CoSsh:
       try:
         self.sftp.stat(pp)
       except:
-        print("sftp: making dir ->",  pp)
+        self.log(1, "sftp: making dir -> %s" % pp)
         self.sftp.mkdir(pp)
 
   def uploadFileTo(self, srcPath, destFolder):
@@ -154,12 +157,12 @@ class CoSsh:
   # sftp 상에 파일을 업로드한다.
   # src_path에 dest_path로 업로드한다. 두개 모두 file full path여야 한다.
   def uploadFile(self, srcPath, destPath):
-    print("sftp: upload file %s -> %s" % (srcPath, destPath))
+    self.log(1, "sftp: upload file %s -> %s" % (srcPath, destPath))
     if not os.path.isfile(srcPath):
       raise Exception("uploadFile: there is no file[%s]" % srcPath)
 
     if self.uploadFilterFunc(srcPath):
-      print(" ** exclude file - %s" % srcPath)
+      self.log(1, " ** exclude file - %s" % srcPath)
       return
 
     self.mkdirs(destPath)
@@ -172,12 +175,12 @@ class CoSsh:
 
   # srcPath, destPath둘다 full path여야한다.
   def uploadFolder(self, srcPath, destPath):
-    print("sftp: upload folder %s -> %s" % (srcPath, destPath))
+    self.log(1, "sftp: upload folder %s -> %s" % (srcPath, destPath))
     if not os.path.isdir(srcPath):
       raise Exception("uploadFolder: there is no folder[%s]" % srcPath)
 
     if self.uploadFilterFunc(srcPath):
-      print(" ** exclude folder - %s" % srcPath)
+      self.log(1, " ** exclude folder - %s" % srcPath)
       return
 
     self.mkdirs(destPath, True)
@@ -189,5 +192,5 @@ class CoSsh:
           target = os.path.join(destPath, cutpath(srcPath, folder), pp)
           self.uploadFile(src, target)
       except Exception as e:
-        print(e)
+        self.log(0, e)
         raise e
