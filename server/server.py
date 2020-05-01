@@ -23,6 +23,19 @@ servers = []
 http post localhost:25090/cmd type=status
 '''
 
+def tsGap2str(ts):
+  hours = int(ts / (60*60))
+  ts -= hours*60*60
+  mins = int(ts / 60)
+  ts -= mins*60
+  secs = ts
+
+  ss = ''
+  if hours > 0:
+    ss += '%dH ' % hours
+  ss += '%02d:%02d' % (mins, secs)
+  return ss
+
 class MyCoSsh(CoSsh):
   def __init__(self, name):
     self.name = name
@@ -127,7 +140,9 @@ class Server:
             lst.append(dict(name='err', v=vv['err'], alertFlag=True))
           if 'ts' in vv:
             ts = vv['ts']
-            lst.append(dict(name='ts', v=str(ts), alertFlag=time.time() - ts > 60))
+            now = time.time()
+            gap = now - ts
+            lst.append(dict(name='ts', v=tsGap2str(gap), alertFlag=gap > 60))
 
           groups.append(dict(name=name, items=lst))
 
