@@ -43,7 +43,7 @@ servers:
       - { type: app, name: engfilet, status: /tmp/engfilet.st }
     
   - name: aws1
-    url: aws1.synapbook.com
+    url: aws1.inertry.com
     id: cjng96
     monitor:
       - cpu
