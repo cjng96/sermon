@@ -157,7 +157,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
             print('item - ${group.items}');
             if(group.items != null) {
               for(var item in group.items) {
-                final txt = Text('${item.name}: ${item.v}', textAlign: TextAlign.left,
+                final txt = Text('${item.name}: ${item.v} ', textAlign: TextAlign.left,
                   style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black));
                 children.add(txt);
               }
