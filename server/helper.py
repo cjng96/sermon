@@ -53,11 +53,11 @@ def main():
                 ss = fp.read()
               st = json.loads(ss)
             except Exception as e:
-              st = dict(err=str(e))
+              st = dict(err=dict(v=str(e), alertFlag=True))
 
             result['apps'][item['name']] = st
         else:
-          result['err'] = 'unknown monitor data type[%s]!!' % type(item)
+          result['err'] = dict(v='unknown monitor data type[%s]!!' % type(item), alertFlag=True)
 
       log.write('result %s\n' % json.dumps(result))
       print(json.dumps(result))
