@@ -10,14 +10,18 @@ servers:
       - swap
       - disk
 
-  - name: engs
+  - name: tks
     url: tk1.synapbook.com
     id: cjng96
     dkName: engs
     dkId: cjng96
     monitor:
-      - { type: app, name: engt, status: /tmp/engt.st }
       - { type: app, name: eng, status: /tmp/eng.st }
+      - { type: app, name: engt, status: /tmp/engt.st }
+      - { type: app, name: inerauth, status: /tmp/inerauth.st }
+      - { type: app, name: inerautht, status: /tmp/inerautht.st }
+      - { type: app, name: inerupdate, status: /tmp/inerupdate.st }
+      - { type: app, name: inerupdatet, status: /tmp/inerupdatet.st }
 
   - name: nj1
     url: nj1.synapbook.com
@@ -28,6 +32,15 @@ servers:
       - mem
       - swap
       - disk
+  
+  - name: njf
+    url: nj1.synapbook.com
+    id: cjng96
+    dkName: efile
+    dkId: cjng96
+    monitor:
+      - { type: app, name: engfile, status: /tmp/engfile.st }
+      - { type: app, name: engfilet, status: /tmp/engfilet.st }
     
   - name: aws1
     url: aws1.synapbook.com
@@ -50,6 +63,6 @@ servers:
       - disk
     
 notification:
- - cjng96@gmail.com
+  - cjng96@gmail.com
 
 port: 25090
