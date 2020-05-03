@@ -17,11 +17,11 @@ servers:
     dkId: cjng96
     monitor:
       - { type: app, name: eng, status: /tmp/eng.st }
-      - { type: app, name: engt, status: /tmp/engt.st }
-      - { type: app, name: inerauth, status: /tmp/inerauth.st }
-      - { type: app, name: inerautht, status: /tmp/inerautht.st }
-      - { type: app, name: inerupdate, status: /tmp/inerupdate.st }
-      - { type: app, name: inerupdatet, status: /tmp/inerupdatet.st }
+      - { type: app, name: engT, status: /tmp/engt.st }
+      - { type: app, name: inerAuth, status: /tmp/inerAuth.st }
+      - { type: app, name: inerAuthT, status: /tmp/inerAuthT.st }
+      - { type: app, name: inerUpdate, status: /tmp/inerUpdate.st }
+      - { type: app, name: inerUpdateT, status: /tmp/inerUpdateT.st }
 
   - name: nj1
     url: nj1.synapbook.com
@@ -39,8 +39,8 @@ servers:
     dkName: efile
     dkId: cjng96
     monitor:
-      - { type: app, name: engfile, status: /tmp/engfile.st }
-      - { type: app, name: engfilet, status: /tmp/engfilet.st }
+      - { type: app, name: engfile, status: /tmp/engFile.st }
+      - { type: app, name: engfilet, status: /tmp/engFileT.st }
     
   - name: aws1
     url: aws1.inertry.com
