@@ -1,4 +1,11 @@
 
+port: 25090
+
+notification:
+  type: gmail
+  id: cjng96@gmail.com
+  pw: 
+
 servers:
   - name: tk1
     url: tk1.synapbook.com
@@ -62,7 +69,3 @@ servers:
       - swap
       - disk
     
-notification:
-  - cjng96@gmail.com
-
-port: 25090

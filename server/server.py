@@ -2,6 +2,7 @@
 
 import os
 import re
+import copy
 import yaml
 import time
 import json
@@ -17,24 +18,16 @@ from coSsh import CoSsh
 from coLog import glog, Error
 from myutil import *
 
+from coTime import tsGap2str
+from coEmail import Email
+
+
 servers = []
+g_cfg = {}
 
 '''
 http post localhost:25090/cmd type=status
 '''
-
-def tsGap2str(ts):
-  hours = int(ts / (60*60))
-  ts -= hours*60*60
-  mins = int(ts / 60)
-  ts -= mins*60
-  secs = ts
-
-  ss = ''
-  if hours > 0:
-    ss += '%dH ' % hours
-  ss += '%02d:%02d' % (mins, secs)
-  return ss
 
 class MyCoSsh(CoSsh):
   def __init__(self, name):
@@ -100,7 +93,7 @@ class Server:
 
     groups:
       - name: engt
-        lst:
+        items:
           - name: err
             v: Error occurs
             alertFlag: True
@@ -111,6 +104,9 @@ class Server:
     '''
     items = []
     groups = []
+    if self.status is None:
+      return dict(name=self.name, items=[dict(v='loading...')], groups=[])
+
     for item in self.cfg['monitor']:
       if type(item) == str:
         vv = self.status[item]
@@ -287,22 +283,122 @@ if os.name == 'nt':
   signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
-def main():
+async def checkLoop():
+  print('check func')
+
+  email = Email()
+  email.init('smtp.gmail.com', 587, g_cfg['notification']['id'], g_cfg['notification']['pw'])
+
+  errChanged = False
+  errList = []  # {name, exist}
+  def _errNew(name):
+    for err in errList:
+      if err['name'] == name:
+        err['exist'] = True
+        return False
+    
+    # new error
+    errList.append(dict(name=name, exist=True))
+    return True
+
+  while True:
+    result = []
+    for ser in servers:
+      result.append(copy.deepcopy(ser.getStatus()))
+
+    print(result)
+
+    for err in errList:
+      err['exist'] = False
+    errChanged = False
+
+    ss = ''
+    for ser in result:
+      ss += '\n\n%s - ' % ser['name']
+
+      for item in ser['items']:
+        if item.get('alertFlag', False):
+          ss += '%s%s, ' % (item['name'], '[E]')
+          if _errNew('%s/%s' % (ser['name'], item['name'])):
+            errChanged = True
+
+      for group in ser['groups']:
+        ss += '\n  %s - ' % group['name']
+
+        for item in group['items']:
+          if item.get('alertFlag', False):
+            ss += '%s%s, ' % (item['name'], '[E]')
+            if _errNew('%s/%s/%s' % (ser['name'], group['name'], item['name'])):
+              errChanged = True
+            item['new'] = True
+
+    for err in errList:
+      if not err['exist']:
+        errChanged = True
+        break
+
+    if errChanged:
+      print('\n\n\nchanged ', errList)
+      # removed - errList / exit false
+      # new - item.new True
+      ##ss = yaml.safe_dump(result)
+      email.sendMsg('inertry@gmail.com', ['cjng96@gmail.com'], 'noti', ss)
+
+    await asyncio.sleep(5)
+
+'''
+    name: SERVER_NAME
+    items:
+      - name: cpu
+        v: 99%
+        alertFlag: True
+
+    groups:
+      - name: engt
+        items:
+          - name: err
+            v: Error occurs
+            alertFlag: True
+          - name: ts
+            v: 00:21
+            alertFlag: False
+'''
+
+def loadConfig():
   with open('./config/base.yml', "r") as fp:
     ss = fp.read()
-
   cfg = yaml.safe_load(ss)
 
-  loop = asyncio.get_event_loop()
-  http = Http(cfg['port'], loop)
+  if os.path.exists('./config/my.yml'):
+    with open('./config/my.yml', "r") as fp:
+      ss = fp.read()
 
-  for cc in cfg['servers']:
+    cfg2 = yaml.safe_load(ss)
+    cfg = dictMerge(cfg, cfg2)
+
+  return cfg
+
+
+def main():
+  global g_cfg
+  g_cfg = loadConfig()
+  ss = '\n'.join(list(map(lambda line: '  '+line, yaml.safe_dump(g_cfg).split('\n'))))
+  print('cfg -\n%s' % ss)
+
+  loop = asyncio.get_event_loop()
+  http = Http(g_cfg['port'], loop)
+
+  for cc in g_cfg['servers']:
     if 'name' not in cc:
       continue
     
     ser = Server(cc)
     servers.append(ser)
     ser.threadStart()
+
+  #check = Timer(1, dict(http=http), checkFunc)
+  asyncio.ensure_future(checkLoop())
+
   try:
     loop.run_forever()
   except KeyboardInterrupt:
