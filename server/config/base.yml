@@ -6,6 +6,8 @@ notification:
   type: gmail
   id: cjng96@gmail.com
   pw: 
+  emails: 
+    - cjng96@gmail.com
 
 servers:
   - name: tk1
