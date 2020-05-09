@@ -111,10 +111,12 @@ class Server:
       if type(item) == str:
         vv = self.status[item]
         if item == 'cpu':
-          items.append(dict(name=item, v='%d%%' % vv, alertFlag=vv > 80))
+          items.append(dict(name=item, v='%d%%' % vv, alertFlag=False)) #vv > 80))
         elif item == 'load':
-          st = '[%d] %.1f,%.1f,%.1f' % (vv['cnt'], vv['avg'][0], vv['avg'][1], vv['avg'][2])
-          items.append(dict(name=item, v=st, alertFlag=False))
+          avg = vv['avg']
+          st = '[%d] %.1f,%.1f,%.1f' % (vv['cnt'], avg[0], avg[1], avg[2])
+          alertFlag = avg[1] > vv['cnt']*0.8  # 10분간 80%이상
+          items.append(dict(name=item, v=st, alertFlag=alertFlag))
         elif item == 'mem':
           st = '%d%%(%dMB)' % (vv['percent'], int(vv['total']/1024/1024))
           items.append(dict(name=item, v=st, alertFlag=vv['percent'] > 90))
@@ -284,7 +286,7 @@ if os.name == 'nt':
 
 
 async def checkLoop():
-  print('check func')
+  await asyncio.sleep(20)
 
   email = Email()
   email.init('smtp.gmail.com', 587, g_cfg['notification']['id'], g_cfg['notification']['pw'])
@@ -306,43 +308,54 @@ async def checkLoop():
     for ser in servers:
       result.append(copy.deepcopy(ser.getStatus()))
 
-    print(result)
-
+    #print(result)
     for err in errList:
       err['exist'] = False
     errChanged = False
 
-    ss = ''
+    notiSubject = ''
+    notiCtx = ''
     for ser in result:
-      ss += '\n\n%s - ' % ser['name']
+      notiCtx += '<br><br>%s - ' % ser['name']
 
       for item in ser['items']:
         if item.get('alertFlag', False):
-          ss += '%s%s, ' % (item['name'], '[E]')
-          if _errNew('%s/%s' % (ser['name'], item['name'])):
+          notiCtx += '<font color="red">%s(%s),</font>&nbsp;' % (item['name'], item['v'])
+          name = '%s/%s' % (ser['name'], item['name'])
+          if _errNew(name):
+            print('new err - %s' % name)
+            notiSubject = '[ERROR] - %s' % name
             errChanged = True
 
       for group in ser['groups']:
-        ss += '\n  %s - ' % group['name']
+        notiCtx += '<br>&nbsp;&nbsp;%s - ' % group['name']
 
         for item in group['items']:
           if item.get('alertFlag', False):
-            ss += '%s%s, ' % (item['name'], '[E]')
-            if _errNew('%s/%s/%s' % (ser['name'], group['name'], item['name'])):
+            notiCtx += '<font color="red">%s(%s),</font>&nbsp;' % (item['name'], item['v'])
+            name = '%s/%s/%s' % (ser['name'], group['name'], item['name'])
+            if _errNew(name):
+              print('new err - %s' % (name))
+              notiSubject = '[ERROR] - %s' % name
               errChanged = True
             item['new'] = True
 
     for err in errList:
       if not err['exist']:
+        print('no exist - %s' % err['name'])
+        notiSubject = '[RECOVER] - %s' % err['name']
         errChanged = True
         break
 
+    errList = list(filter(lambda x: x['exist'], errList))
+
     if errChanged:
-      print('\n\n\nchanged ', errList)
+      print('\n\n\nchanged -', errList)
+      notiCtx += '<br><br><a href=%s>%s</a>' % (g_cfg['domain'], g_cfg['domain'])
       # removed - errList / exit false
       # new - item.new True
       ##ss = yaml.safe_dump(result)
-      email.sendMsg('inertry@gmail.com', ['cjng96@gmail.com'], 'noti', ss)
+      email.sendHtml('inertry@gmail.com', ['cjng96@gmail.com'], notiSubject, notiCtx)
 
     await asyncio.sleep(5)
 
@@ -377,7 +390,6 @@ def loadConfig():
     cfg = dictMerge(cfg, cfg2)
 
   return cfg
-
 
 def main():
   global g_cfg
