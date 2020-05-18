@@ -101,7 +101,7 @@ allow 172.0.0.0/8; # docker''')
 [program:{{server.owner}}]
 user={{server.owner}}
 directory={{deployRoot}}/current/
-command=python3 -u server.py
+command=python3 -u sermon.py
 autostart=true
 autorestart=true
 stopasgroup=true
