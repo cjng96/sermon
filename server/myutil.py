@@ -11,13 +11,16 @@ def str2arg(ss):
 	ss = ss.replace('`', '\\`')	# bash -c "echo '`'" 이거 오류난다.
 	return ss
 
-def makeFile(ssh, content, path, sudo=False, mode=755):
-  #self.onlyRemote()
-  #ss = content.replace('"', '\\"').replace('%', '\%').replace('$', '\$')
+def makeFileCmd(content, path, sudo=False, mode=755):
   content = str2arg(content)
 
   sudoCmd = 'sudo' if sudo else ''
-  ssh.run('echo "{1}" | {0} tee {2} > /dev/null && {0} chmod {3} {2}'.format(sudoCmd, content, path, mode))
+  cmd = 'echo "{1}" | {0} tee {2} > /dev/null && {0} chmod {3} {2}'.format(sudoCmd, content, path, mode)
+  return cmd
+  
+def makeFile(ssh, content, path, sudo=False, mode=755):
+  cmd = makeFileCmd(content, path, sudo, mode)
+  ssh.run(cmd)
 
 import copy
 import collections

@@ -62,9 +62,9 @@ class CoSsh:
 
   def _run(self, cmd, doOutput, arg):
     chan = self.ssh.get_transport().open_session()
+    chan.setblocking(0)
     #chan.get_pty()
     chan.exec_command(cmd)
-    chan.setblocking(0)
     isLoop = True
     while isLoop:
       try:

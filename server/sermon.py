@@ -153,21 +153,35 @@ class Server:
 
     return dict(name=self.name, items=items, groups=groups)
 
-  def dkRun(self, cmd):
+  def dkRunCmd(self, cmd):
     dkRunUser = '-u %s' % self.dkId if self.dkId is not None else ''
     cmd = 'sudo docker exec -i %s %s %s' % (dkRunUser, self.dkName, cmd)
+    return cmd
+
+  def dkRun(self, cmd):
+    cmd = self.dkRunCmd(cmd)
     return self.ssh.runOutput(cmd)
 
   def run(self, pk):
     print('%s: cmd - %s' % (self.name, pk))
     if self.dkName is None:
-      makeFile(self.ssh, json.dumps(pk), '/tmp/sermon.cmd')
-      ss = self.ssh.runOutput('/tmp/sermon.py /tmp/sermon.cmd')
+      # makeFile(self.ssh, json.dumps(pk), '/tmp/sermon.cmd')
+      # ss = self.ssh.runOutput('/tmp/sermon.py /tmp/sermon.cmd')
+      cmd = makeFileCmd(json.dumps(pk), '/tmp/sermon.cmd')
+      cmd += ' && /tmp/sermon.py /tmp/sermon.cmd'
+      ss = self.ssh.runOutput(cmd)
       return json.loads(ss)
     else:
-      makeFile(self.ssh, json.dumps(pk), '/tmp/sermon_%s.cmd' % self.dkName)
-      self.ssh.run('sudo docker cp /tmp/sermon_{0}.cmd {0}:/tmp/sermon.cmd'.format(self.dkName))
-      ss = self.dkRun('/tmp/sermon.py /tmp/sermon.cmd')
+      # 아래 세개 명령을 합쳐서 한번에 수행하자 - 얼마나 차이날라나 2.35 -> 2.13
+      # makeFile(self.ssh, json.dumps(pk), '/tmp/sermon_%s.cmd' % self.dkName)
+      # self.ssh.run('sudo docker cp /tmp/sermon_{0}.cmd {0}:/tmp/sermon.cmd'.format(self.dkName))
+      # ss = self.dkRun('/tmp/sermon.py /tmp/sermon.cmd')
+      cmd = makeFileCmd(json.dumps(pk), '/tmp/sermon_%s.cmd' % self.dkName)
+      cmd += ' && '
+      cmd += 'sudo docker cp /tmp/sermon_{0}.cmd {0}:/tmp/sermon.cmd'.format(self.dkName)
+      cmd += ' && '
+      cmd += self.dkRunCmd('/tmp/sermon.py /tmp/sermon.cmd')
+      ss = self.ssh.runOutput(cmd)
       return json.loads(ss)
 
   def loop(self):
