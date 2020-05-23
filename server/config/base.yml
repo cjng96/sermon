@@ -49,8 +49,8 @@ servers:
     dkName: efile
     dkId: cjng96
     monitor:
-      - { type: app, name: engfile, status: /tmp/engFile.st }
-      - { type: app, name: engfilet, status: /tmp/engFileT.st }
+      - { type: app, name: engFile, status: /tmp/engFile.st }
+      - { type: app, name: engFileT, status: /tmp/engFileT.st }
     
   - name: aws1
     url: aws1.inertry.com
@@ -61,7 +61,21 @@ servers:
       - mem
       - swap
       - disk
-    
+      
+  - name: aws1/coll
+    url: aws1.inertry.com
+    id: cjng96
+    dkName: coll
+    dkId: cjng96
+    monitor:
+      - { type: app, name: coll, status: /tmp/coll.st }
+      - { type: app, name: collT, status: /tmp/collT.st }
+      - { type: app, name: collPlus, status: /tmp/collPlus.st }
+      - { type: app, name: collPlusT, status: /tmp/collPlusT.st }
+      - { type: app, name: inerLog, status: /tmp/inerLog.st }
+      - { type: app, name: inerLogT, status: /tmp/inerLogT.st }
+      - { type: app, name: collAdmin, status: /tmp/collAdmin.st }
+        
   - name: n2
     url: nas.mmx.kr:7022
     id: cjng96
