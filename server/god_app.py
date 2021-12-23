@@ -18,23 +18,27 @@ deploy:
     - "*"
   exclude:
     - __pycache__
+
   sharedLinks: []
 
-#defaultVars:
+defaultVars:
+  dkName: sermon
 
 servers:
   - name: prod
     host: nas.mmx.kr
     port: 7022
     id: cjng96
-    dkName: ser
-    dkId: cjng96
+    # dkName: ser
+    # dkId: cjng96
     owner: sermon
-    deployRoot: /home/{{server.owner}}
+    # deployRoot: /home/{{server.owner}}
+    deployRoot: /app
     vars:
       domain: sermon.mmx.kr
       webDocker: web
       root: /data/sermon
+
 """
 
 import os
@@ -56,6 +60,86 @@ class myGod:
         # local.goBuild()
         pass
 
+    def setupTask(self, util, local, remote, **_):
+        baseName, baseVer = my.dockerCoImage(remote)
+
+        dkImg = "sermon"
+        dkVer = my.deployCheckVersion(remote, util)
+        dkVer = f"{baseVer}.{dkVer}"
+
+        def update(env):
+            env.deployApp(
+                "./god_app",
+                profile=remote.server.name,
+                serverOvr=dict(dkName=dkImg + "-con"),
+                varsOvr=dict(startDaemon=False, sepDk=True),
+            )
+
+            with open("config/base.yml", "r") as fp:
+                cfg = yaml.safe_load(fp.read())
+
+            # register ssh key of sermon
+            # pub = remote.runOutput(f"sudo cat /home/{remote.server.owner}/.ssh/id_rsa.pub")
+            pub = env.runOutput(f"sudo cat /root/.ssh/id_rsa.pub")
+            for server in cfg["servers"]:
+                arr = server["url"].split(":")
+                host = arr[0]
+                port = int(arr[1]) if len(arr) >= 2 else 22
+                dkName = server.get("dkName", None)
+                dkId = server.get("dkId", None)
+                ser = env.remoteConn(host=host, port=port, id=server["id"], dkName=dkName, dkId=dkId)
+                my.registerAuthPub(ser, id=server["id"], pub=pub)
+
+            env.makeFile(
+                f"""\
+#!/bin/sh
+{my.upcntRunStr()}
+cd /app/current
+exec python3 -u sermon.py
+""",
+                "/etc/service/app/run",
+                makeFolder=True,
+            )
+
+        # 이미지는 모두 동일하고, 환경은 실행할때 변수로 주자
+        my.dockerUpdateImage(
+            remote,
+            baseName=baseName,
+            baseVer=baseVer,
+            newName=dkImg,
+            newVer=dkVer,
+            func=update,
+        )
+
+        if remote.runFlag:
+            # create container
+            my.dockerRunCmd(
+                remote.vars.dkName,
+                f"{dkImg}:{dkVer}",
+                env=remote,
+                net="net",
+                extra=f"-e PROFILE={remote.server.name}",
+            )
+            dk = remote.dockerConn(remote.vars.dkName)
+
+            with open("config/base.yml", "r") as fp:
+                env = yaml.safe_load(fp.read())
+
+            proxyUrl = f"http://{remote.vars.dkName}:{env['port']}"
+            web = remote.dockerConn(remote.vars.webDocker)  # , dkId=remote.server.dkId)
+            my.setupWebApp(
+                web,
+                name=remote.server.owner,
+                domain=remote.vars.domain,
+                certAdminEmail="cjng96@gmail.com",
+                root=f"{remote.vars.root}/current",
+                publicApi="/cmd",
+                proxyUrl=proxyUrl,
+                privateApi="/api/pcmd",
+                privateFilter="""\
+allow 172.0.0.0/8; # docker""",
+            )
+
     def deployPreTask(self, util, remote, local, **_):
         # create new user with ssh key
         # remote.userNew(remote.server.owner, existOk=True, sshKey=True)
@@ -63,11 +147,17 @@ class myGod:
         # remote.run('sudo touch {0} && sudo chmod 700 {0}'.format('/home/{{server.owner}}/.ssh/authorized_keys'))
         # remote.strEnsure("/home/{{server.owner}}/.ssh/authorized_keys", local.strLoad("~/.ssh/id_rsa.pub"), sudo=True)
 
-        # 현재 user만들고 sv조작때문에 sudo가 필요하다
-        pubs = list(map(lambda x: x["key"], self.data.sshPub))
-        pubs.append(local.strLoad("~/.ssh/id_rsa.pub"))
-        my.makeUser(remote, id=remote.server.owner, authPubs=pubs)
-        remote.run(f"sudo adduser {remote.server.id} {remote.server.owner}")
+        if remote.vars.sepDk:
+            my.makeUser(remote, id="sermon", genSshKey=False)
+            my.makeUser(remote, id="cjng96", genSshKey=False)
+            my.sshKeyGen(remote, id="root")
+
+        else:
+            # 현재 user만들고 sv조작때문에 sudo가 필요하다
+            pubs = list(map(lambda x: x["key"], self.data.sshPub))
+            pubs.append(local.strLoad("~/.ssh/id_rsa.pub"))
+            my.makeUser(remote, id=remote.server.owner, authPubs=pubs)
+            remote.run(f"sudo adduser {remote.server.id} {remote.server.owner}")
 
     def deployPostTask(self, util, remote, local, **_):
         # web과 server를 지원하는 nginx 설정
@@ -76,38 +166,10 @@ class myGod:
         remote.run("sudo apt install --no-install-recommends -y libffi-dev")
         remote.run(f"cd {remote.server.deployPath} && sudo -H pip3 install -r requirements.txt")
 
-        with open("config/base.yml", "r") as fp:
-            env = yaml.safe_load(fp.read())
-
-        proxyUrl = f"http://{remote.server.dkName}:{env['port']}")
-        web = remote.otherDockerConn(remote.vars.webDocker, dkId=remote.server.dkId)
-        my.setupWebApp(
-            web,
-            name=remote.server.owner,
-            domain=remote.vars.domain,
-            certAdminEmail="cjng96@gmail.com",
-            root=f"{remote.vars.root}/current",
-            apiPath="/cmd",
-            proxyUrl=proxyUrl,
-            privateApi="/api/pcmd",
-            privateFilter="""\
-allow 172.0.0.0/8; # docker""",
-        )
-
-        # register ssh key of sermon
-        pub = remote.runOutput(f"sudo cat /home/{remote.server.owner}/.ssh/id_rsa.pub")
-        for server in env["servers"]:
-            arr = server["url"].split(":")
-            host = arr[0]
-            port = int(arr[1]) if len(arr) >= 2 else 22
-            dkName = server.get("dkName", None)
-            dkId = server.get("dkId", None)
-            ser = remote.remoteConn(host=host, port=port, id=server["id"], dkName=dkName, dkId=dkId)
-            my.registerAuthPub(ser, id=dkId, pub=pub)
-
-        # register supervisor
-        remote.makeFile(
-            """\
+        if not remote.vars.sepDk:
+            # register supervisor
+            remote.makeFile(
+                """\
 [program:{{server.owner}}]
 user={{server.owner}}
 directory={{deployRoot}}/current/
@@ -124,7 +186,7 @@ stderr_logfile_maxbytes=50MB
 stdout_logfile_backups=2
 stderr_logfile_backups=2
 """,
-            f"/etc/supervisor/conf.d/{remote.server.owner}.conf",
-            sudo=True,
-        )
-        remote.run(f"sudo supervisorctl update && sudo supervisorctl restart {remote.server.owner}")
+                f"/etc/supervisor/conf.d/{remote.server.owner}.conf",
+                sudo=True,
+            )
+            remote.run(f"sudo supervisorctl update && sudo supervisorctl restart {remote.server.owner}")

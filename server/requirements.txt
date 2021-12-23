@@ -1,4 +1,4 @@
 paramiko
-PyYAML==4.2b1
+PyYAML
 aiohttp
 aiohttp-cors

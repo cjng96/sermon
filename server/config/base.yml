@@ -1,12 +1,11 @@
-
 port: 25090
 domain: sermon.mmx.kr
 
 notification:
   type: gmail
   id: cjng96@gmail.com
-  pw: 
-  emails: 
+  pw:
+  emails:
     - cjng96@gmail.com
 
 servers:
@@ -19,19 +18,14 @@ servers:
       - mem
       - swap
       - disk
-
-  - name: tks
-    url: tk1.inertry.com
-    id: cjng96
-    dkName: engs
-    dkId: cjng96
-    monitor:
-      - { type: app, name: eng, status: /tmp/eng.st }
-      - { type: app, name: engT, status: /tmp/engt.st }
-      - { type: app, name: inerAuth, status: /tmp/inerAuth.st }
-      - { type: app, name: inerAuthT, status: /tmp/inerAuthT.st }
-      - { type: app, name: inerUpdate, status: /tmp/inerUpdate.st }
-      - { type: app, name: inerUpdateT, status: /tmp/inerUpdateT.st }
+      - { type: app, name: eng, status: /work/eng/eng.st }
+      - { type: app, name: engT, status: /work/engt/engt.st }
+      - { type: app, name: inerAuth, status: /work/iauth/inerAuth.st }
+      - { type: app, name: inerAuthT, status: /work/iautht/inerAuthT.st }
+      - { type: app, name: inerUpdate, status: /work/iupdate/inerUpdate.st }
+      - { type: app, name: inerUpdateT, status: /work/iupdatet/inerUpdateT.st }
+      - { type: app, name: engFile, status: /work/efile/engFile.st }
+      - { type: app, name: engFileT, status: /work/efilet/engFileT.st }
 
   - name: nj1
     url: nj1.inertry.com
@@ -42,16 +36,7 @@ servers:
       - mem
       - swap
       - disk
-  
-  - name: njf
-    url: nj1.inertry.com
-    id: cjng96
-    dkName: efile
-    dkId: cjng96
-    monitor:
-      - { type: app, name: engFile, status: /tmp/engFile.st }
-      - { type: app, name: engFileT, status: /tmp/engFileT.st }
-    
+
   - name: aws1
     url: aws1.inertry.com
     id: cjng96
@@ -61,11 +46,11 @@ servers:
       - mem
       - swap
       - disk
-      
+
   - name: aws1/coll
     url: aws1.inertry.com
     id: cjng96
-    dkName: coll
+    dkName: colls
     dkId: cjng96
     monitor:
       - { type: app, name: coll, status: /tmp/coll.st }
@@ -75,7 +60,7 @@ servers:
       - { type: app, name: inerLog, status: /tmp/inerLog.st }
       - { type: app, name: inerLogT, status: /tmp/inerLogT.st }
       - { type: app, name: collAdmin, status: /tmp/collAdmin.st }
-        
+
   - name: n2
     url: nas.mmx.kr:7022
     id: cjng96
@@ -85,4 +70,3 @@ servers:
       - mem
       - swap
       - disk
-    
