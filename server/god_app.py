@@ -166,6 +166,8 @@ allow 172.0.0.0/8; # docker""",
         remote.run("sudo apt install --no-install-recommends -y libffi-dev")
         remote.run(f"cd {remote.server.deployPath} && sudo -H pip3 install -r requirements.txt")
 
+        # TODO: my.yml notification.pw를 생성해주자
+
         if not remote.vars.sepDk:
             # register supervisor
             remote.makeFile(

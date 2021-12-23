@@ -27,16 +27,6 @@ servers:
       - { type: app, name: engFile, status: /work/efile/engFile.st }
       - { type: app, name: engFileT, status: /work/efilet/engFileT.st }
 
-  - name: nj1
-    url: nj1.inertry.com
-    id: cjng96
-    monitor:
-      - cpu
-      - load
-      - mem
-      - swap
-      - disk
-
   - name: aws1
     url: aws1.inertry.com
     id: cjng96
