@@ -59,7 +59,8 @@ class myGod:
         # remote.run('sudo touch {0} && sudo chmod 700 {0}'.format('/home/{{server.owner}}/.ssh/authorized_keys'))
         # remote.strEnsure("/home/{{server.owner}}/.ssh/authorized_keys", local.strLoad("~/.ssh/id_rsa.pub"), sudo=True)
 
-        remote.run("sudo mkdir -p {0} && sudo chown cjng96: {0}".format(remote.server.deployRoot))
+        # remote.run("sudo mkdir -p {0} && sudo chown cjng96: {0}".format(remote.server.deployRoot))
+        remote.run(f"sudo mkdir -p {remote.server.deployRoot}")
 
         pp = "./build/web/index.html"
         with open(pp, "r") as fp:
