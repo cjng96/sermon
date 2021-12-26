@@ -26,6 +26,13 @@ servers:
       - { type: app, name: inerUpdateT, status: /work/iupdatet/inerUpdateT.st }
       - { type: app, name: engFile, status: /work/efile/engFile.st }
       - { type: app, name: engFileT, status: /work/efilet/engFileT.st }
+      - { type: app, name: coll, status: /work/coll/coll.st }
+      - { type: app, name: collT, status: /work/collt/collT.st }
+      - { type: app, name: collPlus, status: /work/collplus/collPlus.st }
+      - { type: app, name: collPlusT, status: /work/collplust/collPlusT.st }
+      - { type: app, name: inerLog, status: /work/ilog/inerLog.st }
+      - { type: app, name: inerLogT, status: /work/ilogt/inerLogT.st }
+      - { type: app, name: collAdmin, status: /work/collAdmin/collAdmin.st }
 
   - name: aws1
     url: aws1.inertry.com
@@ -36,13 +43,6 @@ servers:
       - mem
       - swap
       - disk
-      - { type: app, name: coll, status: /work/coll/coll.st }
-      - { type: app, name: collT, status: /work/collt/collT.st }
-      - { type: app, name: collPlus, status: /work/collplus/collPlus.st }
-      - { type: app, name: collPlusT, status: /work/collplust/collPlusT.st }
-      - { type: app, name: inerLog, status: /work/ilog/inerLog.st }
-      - { type: app, name: inerLogT, status: /work/ilogt/inerLogT.st }
-      - { type: app, name: collAdmin, status: /work/collAdmin/collAdmin.st }
 
   - name: n2
     url: nas.mmx.kr:7022
