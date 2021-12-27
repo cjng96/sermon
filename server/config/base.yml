@@ -18,21 +18,25 @@ servers:
       - mem
       - swap
       - disk
-      - { type: app, name: eng, status: /work/eng/eng.st }
-      - { type: app, name: engT, status: /work/engt/engt.st }
-      - { type: app, name: inerAuth, status: /work/iauth/inerAuth.st }
-      - { type: app, name: inerAuthT, status: /work/iautht/inerAuthT.st }
-      - { type: app, name: inerUpdate, status: /work/iupdate/inerUpdate.st }
-      - { type: app, name: inerUpdateT, status: /work/iupdatet/inerUpdateT.st }
-      - { type: app, name: engFile, status: /work/efile/engFile.st }
-      - { type: app, name: engFileT, status: /work/efilet/engFileT.st }
-      - { type: app, name: coll, status: /work/coll/coll.st }
-      - { type: app, name: collT, status: /work/collt/collT.st }
-      - { type: app, name: collPlus, status: /work/collplus/collPlus.st }
-      - { type: app, name: collPlusT, status: /work/collplust/collPlusT.st }
-      - { type: app, name: inerLog, status: /work/ilog/inerLog.st }
-      - { type: app, name: inerLogT, status: /work/ilogt/inerLogT.st }
-      - { type: app, name: collAdmin, status: /work/collAdmin/collAdmin.st }
+      - { type: app, name: eng, status: /data/eng/tmp/eng.st }
+      - { type: app, name: engT, status: /data/engt/tmp/engt.st }
+      - { type: app, name: inerAuth, status: /data/iauth/tmp/inerAuth.st }
+      - { type: app, name: inerAuthT, status: /data/iautht/tmp/inerAuthT.st }
+      - { type: app, name: inerUpdate, status: /data/iupdate/tmp/inerUpdate.st }
+      - {
+          type: app,
+          name: inerUpdateT,
+          status: /data/iupdatet/tmp/inerUpdateT.st,
+        }
+      - { type: app, name: engFile, status: /data/efile/tmp/engFile.st }
+      - { type: app, name: engFileT, status: /data/efilet/tmp/engFileT.st }
+      - { type: app, name: coll, status: /data/coll/tmp/coll.st }
+      - { type: app, name: collT, status: /data/collt/tmp/collT.st }
+      - { type: app, name: collPlus, status: /data/collplus/tmp/collPlus.st }
+      - { type: app, name: collPlusT, status: /data/collplust/tmp/collPlusT.st }
+      - { type: app, name: inerLog, status: /data/ilog/tmp/inerLog.st }
+      - { type: app, name: inerLogT, status: /data/ilogt/tmp/inerLogT.st }
+      - { type: app, name: collAdmin, status: /data/collAdmin/tmp/collAdmin.st }
 
   - name: aws1
     url: aws1.inertry.com
