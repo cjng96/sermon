@@ -64,8 +64,9 @@ class myGod:
         baseName, baseVer = my.dockerCoImage(remote)
 
         dkImg = "sermon"
-        dkVer = my.deployCheckVersion(remote, util)
-        dkVer = f"{baseVer}.{dkVer}"
+        # dkVer = my.deployCheckVersion(remote, util)
+        # dkVer = f"{baseVer}.{dkVer}"
+        dkVer, hash = my.deployCheckVersion(remote, util, dkImg, f"{baseVer}.")
 
         def update(env):
             env.deployApp(
@@ -108,6 +109,7 @@ exec python3 -u sermon.py
             baseVer=baseVer,
             newName=dkImg,
             newVer=dkVer,
+            hash=hash,
             func=update,
         )
 
