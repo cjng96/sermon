@@ -9,8 +9,8 @@ notification:
     - cjng96@gmail.com
 
 servers:
-  - name: ko1
-    url: ko.inertry.com
+  - name: kos
+    url: kos.inertry.com
     id: cjng96
     monitor:
       - cpu
