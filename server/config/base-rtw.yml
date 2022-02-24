@@ -1,5 +1,5 @@
 port: 25090
-domain: domain.com
+domain: watchmon.ucount.it
 
 notification:
   type: gmail
@@ -9,14 +9,12 @@ notification:
     - cjng96@gmail.com
 
 servers:
-  - name: aws1
-    url: aws1.server.com
-    id: cjng96
+  - name: rtw
+    url: watchmon.ucount.it:443
+    id: ubuntu
     monitor:
       - cpu
       - load
       - mem
       - swap
       - disk
-      - { type: app, name: app, status: /work/app/app.st }
-      - { type: app, name: appt, status: /work/appt/appt.st }

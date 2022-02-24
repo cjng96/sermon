@@ -18,6 +18,8 @@ deploy:
     - "*"
   exclude:
     - __pycache__
+    - config/my.yml
+    - "config/base-*.yml"
 
   sharedLinks: []
 
@@ -25,7 +27,7 @@ defaultVars:
   dkName: sermon
 
 servers:
-  - name: prod
+  - name: mmx
     host: nas.mmx.kr
     port: 7022
     id: cjng96
@@ -36,6 +38,20 @@ servers:
     deployRoot: /app
     vars:
       domain: sermon.mmx.kr
+      webDocker: web
+      root: /data/sermon
+
+  - name: rtw
+    host: watchmon.ucount.it
+    port: 443
+    id: ubuntu
+    # dkName: ser
+    # dkId: cjng96
+    # owner: sermon
+    # deployRoot: /home/{{server.owner}}
+    deployRoot: /app
+    vars:
+      domain: watchmon.ucount.it
       webDocker: web
       root: /data/sermon
 
@@ -64,11 +80,11 @@ class myGod:
         baseName, baseVer = my.dockerCoImage(remote)
 
         dkImg = "sermon"
-        # dkVer = my.deployCheckVersion(remote, util)
-        # dkVer = f"{baseVer}.{dkVer}"
         dkVer, hash = my.deployCheckVersion(remote, util, dkImg, f"{baseVer}.")
 
         def update(env):
+            env.run("cd /etc/service && rm -rf sshd cron")
+
             env.deployApp(
                 "./god_app",
                 profile=remote.server.name,
@@ -76,8 +92,12 @@ class myGod:
                 varsOvr=dict(startDaemon=False, sepDk=True),
             )
 
-            with open("config/base.yml", "r") as fp:
-                cfg = yaml.safe_load(fp.read())
+            env.copyFile(f"config/base-{remote.server.name}.yml", "/app/current/config/my.yml")
+
+            # with open(f"config/base-{remote.server.name}.yml", "r") as fp:
+            #     cfg = yaml.safe_load(fp.read())
+            ss = env.runOutput("cat /app/current/config/my.yml")
+            cfg = yaml.safe_load(ss)
 
             # register ssh key of sermon
             # pub = remote.runOutput(f"sudo cat /home/{remote.server.owner}/.ssh/id_rsa.pub")
@@ -91,15 +111,12 @@ class myGod:
                 ser = env.remoteConn(host=host, port=port, id=server["id"], dkName=dkName, dkId=dkId)
                 my.registerAuthPub(ser, id=server["id"], pub=pub)
 
-            env.makeFile(
-                f"""\
-#!/bin/sh
-{my.upcntRunStr()}
+            my.writeRunScript(
+                dk,
+                cmd="""
 cd /app/current
 exec python3 -u sermon.py
 """,
-                "/etc/service/app/run",
-                makeFolder=True,
             )
 
         # 이미지는 모두 동일하고, 환경은 실행할때 변수로 주자
@@ -124,14 +141,17 @@ exec python3 -u sermon.py
             )
             dk = remote.dockerConn(remote.vars.dkName)
 
-            with open("config/base.yml", "r") as fp:
-                env = yaml.safe_load(fp.read())
+            # with open(f"config/my.yml", "r") as fp:
+            # env = yaml.safe_load(fp.read())
+            ss = dk.runOutput("cat /app/current/config/my.yml")
+            cfg = yaml.safe_load(ss)
 
-            proxyUrl = f"http://{remote.vars.dkName}:{env['port']}"
+            proxyUrl = f"http://{remote.vars.dkName}:{cfg['port']}"
             web = remote.dockerConn(remote.vars.webDocker)  # , dkId=remote.server.dkId)
             my.setupWebApp(
                 web,
-                name=remote.server.owner,
+                # name=remote.server.owner,
+                name=remote.config.name,
                 domain=remote.vars.domain,
                 certAdminEmail="cjng96@gmail.com",
                 root=f"{remote.vars.root}/current",
@@ -140,6 +160,7 @@ exec python3 -u sermon.py
                 privateApi="/api/pcmd",
                 privateFilter="""\
 allow 172.0.0.0/8; # docker""",
+                certSetup=remote.server.name != "rtw",
             )
 
     def deployPreTask(self, util, remote, local, **_):
