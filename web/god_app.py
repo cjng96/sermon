@@ -20,7 +20,7 @@ deploy:
       dest: .
 
 servers:
-  - name: prod
+  - name: mmx
     host: nas.mmx.kr
     port: 7022
     id: cjng96
@@ -29,7 +29,18 @@ servers:
     #owner: websert
     deployRoot: /data/sermon
     vars:
-      domain: sermon.mmx.kr
+      serverUrl: https://sermon.mmx.kr/cmd
+
+  - name: rtw
+    host: watchmon.ucount.it
+    port: 443
+    id: ubuntu
+    dkName: web
+    # dkId: cjng96
+    #owner: websert
+    deployRoot: /data/sermon
+    vars:
+      serverUrl: http://watchmon.ucount.it/cmd
 """
 
 import os, sys
@@ -51,7 +62,7 @@ class myGod:
         pass
 
     def deployPreTask(self, util, remote, local, **_):
-        local.run("cmd flutter build web")
+        local.run(f"cmd flutter build web --dart-define=SERVER_URL={remote.vars.serverUrl}")
 
         # create new user with ssh key
         # remote.userNew(remote.server.owner, existOk=True, sshKey=True)
@@ -66,7 +77,7 @@ class myGod:
         with open(pp, "r") as fp:
             ss = fp.read()
 
-        ss = ss.replace('"main.dart.js"', '"main.dart.js?v=%d"' % int(time.time()))
+        ss = ss.replace('"main.dart.js"', f'"main.dart.js?v={int(time.time())}"')
         print(ss)
         with open("./build/web/index.html", "w") as fp:
             fp.write(ss)
