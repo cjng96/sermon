@@ -178,9 +178,9 @@ class Server:
             # makeFile(self.ssh, json.dumps(pk), '/tmp/sermon_%s.cmd' % self.dkName)
             # self.ssh.run('sudo docker cp /tmp/sermon_{0}.cmd {0}:/tmp/sermon.cmd'.format(self.dkName))
             # ss = self.dkRun('/tmp/sermon.py /tmp/sermon.cmd')
-            cmd = makeFileCmd(json.dumps(pk), "/tmp/sermon_%s.cmd" % self.dkName)
+            cmd = makeFileCmd(json.dumps(pk), f"/tmp/sermon_{self.dkName}.cmd")
             cmd += " && "
-            cmd += "sudo docker cp /tmp/sermon_{0}.cmd {0}:/tmp/sermon.cmd".format(self.dkName)
+            cmd += f"sudo docker cp /tmp/sermon_{self.dkName}.cmd {self.dkName}:/tmp/sermon.cmd"
             cmd += " && "
             cmd += self.dkRunCmd("/tmp/sermon.py /tmp/sermon.cmd")
             ss = self.ssh.runOutput(cmd)

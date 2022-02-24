@@ -61,6 +61,10 @@ servers:
 해당 서버에서 
 sudo yum install python3-devel
 sudo pip3 install psutil
+
+app은 
+{"ts": 1645681433, "web": {"v": 3725}, "tcp": {"v": 4239}, "startup": {"v": "7D 16:23"}, "certDays": "-45D"}
+v말고 alertFlag=true가 있으면 오류로 처리
 """
 
 import os
