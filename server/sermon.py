@@ -113,7 +113,7 @@ class Server:
             if type(item) == str:
                 vv = self.status[item]
                 if item == "cpu":
-                    items.append(dict(name=item, v="%d%%" % vv, alertFlag=False))  # vv > 80))
+                    items.append(dict(name=item, v="%.1f%%" % vv, alertFlag=False))  # vv > 80))
                 elif item == "load":
                     avg = vv["avg"]
                     st = "[%d] %.1f,%.1f,%.1f" % (vv["cnt"], avg[0], avg[1], avg[2])
@@ -138,10 +138,11 @@ class Server:
                     lst = []
 
                     # ts먼저 처리
-                    ts = vv["ts"]
-                    now = time.time()
-                    gap = now - ts
-                    lst.append(dict(name="ts", v=tsGap2str(gap), alertFlag=gap > 60))
+                    ts = vv.get("ts")
+                    if ts is not None:
+                        now = time.time()
+                        gap = now - ts
+                        lst.append(dict(name="ts", v=tsGap2str(gap), alertFlag=gap > 60))
 
                     for key in vv:
                         item = vv[key]
