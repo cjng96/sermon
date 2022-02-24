@@ -136,20 +136,29 @@ class Server:
                     name = item["name"]
                     vv = self.status["apps"][name]
                     lst = []
-                    for v in vv:
-                        item = vv[v]
-                        if v == "ts":
-                            ts = item
-                            now = time.time()
-                            gap = now - ts
-                            lst.append(dict(name="ts", v=tsGap2str(gap), alertFlag=gap > 60))
+
+                    # ts먼저 처리
+                    ts = vv["ts"]
+                    now = time.time()
+                    gap = now - ts
+                    lst.append(dict(name="ts", v=tsGap2str(gap), alertFlag=gap > 60))
+
+                    for key in vv:
+                        item = vv[key]
+                        if key == "ts":
+                            continue
+                        elif key == "arr":
+                            for node in item:
+                                alertFlag = node.get("alertFlag", False)
+                                lst.append(dict(name=node["n"], v=str(node["v"]), alertFlag=alertFlag))
                         else:
                             if type(item) is dict:
-                                alertFlag = item["alertFlag"] if "alertFlag" in item else False
-                                lst.append(dict(name=v, v=str(item["v"]), alertFlag=alertFlag))
+                                # alertFlag = item["alertFlag"] if "alertFlag" in item else False
+                                alertFlag = item.get("alertFlag", False)
+                                lst.append(dict(name=key, v=str(item["v"]), alertFlag=alertFlag))
                             else:
                                 # old style
-                                lst.append(dict(name=v, v=str(item), alertFlag=False))
+                                lst.append(dict(name=key, v=str(item), alertFlag=False))
 
                     groups.append(dict(name=name, items=lst))
 
