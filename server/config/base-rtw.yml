@@ -9,9 +9,19 @@ notification:
     - cjng96@gmail.com
 
 servers:
-  - name: rtw
+  - name: watchmon
     url: watchmon.ucount.it:443
     id: ubuntu
+    monitor:
+      - cpu
+      - load
+      - mem
+      - swap
+      - disk
+
+  - name: retailtrend
+    url: retailtrend.net
+    id: cjng96
     monitor:
       - cpu
       - load

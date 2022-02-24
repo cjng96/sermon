@@ -57,6 +57,12 @@ servers:
 
 """
 
+"""
+해당 서버에서 
+sudo yum install python3-devel
+sudo pip3 install psutil
+"""
+
 import os
 import sys
 
@@ -111,14 +117,6 @@ class myGod:
                 ser = env.remoteConn(host=host, port=port, id=server["id"], dkName=dkName, dkId=dkId)
                 my.registerAuthPub(ser, id=server["id"], pub=pub)
 
-            my.writeRunScript(
-                dk,
-                cmd="""
-cd /app/current
-exec python3 -u sermon.py
-""",
-            )
-
         # 이미지는 모두 동일하고, 환경은 실행할때 변수로 주자
         my.dockerUpdateImage(
             remote,
@@ -145,6 +143,14 @@ exec python3 -u sermon.py
             # env = yaml.safe_load(fp.read())
             ss = dk.runOutput("cat /app/current/config/my.yml")
             cfg = yaml.safe_load(ss)
+
+            my.writeRunScript(
+                dk,
+                cmd="""
+cd /app/current
+exec python3 -u sermon.py
+""",
+            )
 
             proxyUrl = f"http://{remote.vars.dkName}:{cfg['port']}"
             web = remote.dockerConn(remote.vars.webDocker)  # , dkId=remote.server.dkId)
