@@ -40,3 +40,4 @@ servers:
       - swap
       - disk
       - { type: app, name: reportMsgT, status: /work/msgt/app.st }
+      - { type: app, name: reportMsg, status: /work/msg/app.st }
