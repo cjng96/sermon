@@ -91,6 +91,7 @@ class myGod:
 
         dkImg = "sermon"
         dkVer, hash = my.deployCheckVersion(remote, util, dkImg, f"{baseVer}.")
+        # base-mmx.yml이 갱신되도 다시 업데이트 해야하나
 
         def update(env):
             env.run("cd /etc/service && rm -rf sshd cron")
@@ -142,6 +143,9 @@ class myGod:
                 extra=f"-e PROFILE={remote.server.name}",
             )
             dk = remote.dockerConn(remote.vars.dkName)
+
+            # 갱신될을수 있으니 매번
+            dk.copyFile(f"config/base-{remote.server.name}.yml", "/app/current/config/my.yml")
 
             # with open(f"config/my.yml", "r") as fp:
             # env = yaml.safe_load(fp.read())
