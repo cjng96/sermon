@@ -380,7 +380,7 @@ async def checkLoop():
             # removed - errList / exit false
             # new - item.new True
             ##ss = yaml.safe_dump(result)
-            email.sendHtml("inertry@gmail.com", g_cfg["notification"]["emails"], notiSubject, notiCtx)
+            email.sendHtml("sermon@sermon.com", g_cfg["notification"]["emails"], notiSubject, notiCtx)
 
         await asyncio.sleep(5)
 
