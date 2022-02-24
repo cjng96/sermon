@@ -18,6 +18,7 @@ servers:
       - mem
       - swap
       - disk
+      - { type: app, name: dataMon, status: /tmp/dataMon.st }
 
   - name: retailtrend
     url: retailtrend.net
@@ -28,3 +29,14 @@ servers:
       - mem
       - swap
       - disk
+
+  - name: secure
+    url: secure.retailtrend.net
+    id: cjng96
+    monitor:
+      - cpu
+      - load
+      - mem
+      - swap
+      - disk
+      - { type: app, name: reportMsgT, status: /work/msgt/app.st }
