@@ -18,7 +18,7 @@ servers:
       - mem
       - swap
       - disk
-      - { type: app, name: dataMon, status: /tmp/dataMon.st }
+      - { type: app, name: dataMon, status: /tmp/dataMon-prod.st }
 
   - name: retailtrend
     url: retailtrend.net
