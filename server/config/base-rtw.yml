@@ -30,6 +30,16 @@ servers:
       - swap
       - disk
 
+  - name: develop
+    url: dev.retailanalysis.cloud
+    id: cjng96
+    monitor:
+      # - cpu
+      - load
+      - mem
+      - swap
+      - disk
+
   - name: secure
     url: secure.retailtrend.net
     id: cjng96
