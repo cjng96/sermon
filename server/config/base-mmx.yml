@@ -13,7 +13,7 @@ servers:
     url: kos.inertry.com
     id: cjng96
     monitor:
-      - cpu
+      # - cpu
       - load
       - mem
       - swap
@@ -34,21 +34,11 @@ servers:
       - { type: app, name: inerLogT, status: /work/ilogt/inerLogT.st }
       - { type: app, name: collAdmin, status: /work/collAdmin/collAdmin.st }
 
-  - name: aws1
-    url: aws1.inertry.com
-    id: cjng96
-    monitor:
-      - cpu
-      - load
-      - mem
-      - swap
-      - disk
-
   - name: n2
     url: nas.mmx.kr:7022
     id: cjng96
     monitor:
-      - cpu
+      # - cpu
       - load
       - mem
       - swap
