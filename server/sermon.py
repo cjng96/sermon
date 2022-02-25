@@ -176,25 +176,35 @@ class Server:
 
     def run(self, pk):
         print("%s: cmd - %s" % (self.name, pk))
-        if self.dkName is None:
-            # makeFile(self.ssh, json.dumps(pk), '/tmp/sermon.cmd')
-            # ss = self.ssh.runOutput('/tmp/sermon.py /tmp/sermon.cmd')
-            cmd = makeFileCmd(json.dumps(pk), "/tmp/sermon.cmd")
-            cmd += " && /tmp/sermon.py /tmp/sermon.cmd"
-            ss = self.ssh.runOutput(cmd)
-            return json.loads(ss)
-        else:
-            # 아래 세개 명령을 합쳐서 한번에 수행하자 - 얼마나 차이날라나 2.35 -> 2.13
-            # makeFile(self.ssh, json.dumps(pk), '/tmp/sermon_%s.cmd' % self.dkName)
-            # self.ssh.run('sudo docker cp /tmp/sermon_{0}.cmd {0}:/tmp/sermon.cmd'.format(self.dkName))
-            # ss = self.dkRun('/tmp/sermon.py /tmp/sermon.cmd')
-            cmd = makeFileCmd(json.dumps(pk), f"/tmp/sermon_{self.dkName}.cmd")
-            cmd += " && "
-            cmd += f"sudo docker cp /tmp/sermon_{self.dkName}.cmd {self.dkName}:/tmp/sermon.cmd"
-            cmd += " && "
-            cmd += self.dkRunCmd("/tmp/sermon.py /tmp/sermon.cmd")
-            ss = self.ssh.runOutput(cmd)
-            return json.loads(ss)
+        for i in range(3):
+            try:
+                if self.dkName is None:
+                    # makeFile(self.ssh, json.dumps(pk), '/tmp/sermon.cmd')
+                    # ss = self.ssh.runOutput('/tmp/sermon.py /tmp/sermon.cmd')
+                    cmd = makeFileCmd(json.dumps(pk), "/tmp/sermon.cmd")
+                    cmd += " && /tmp/sermon.py /tmp/sermon.cmd"
+                    ss = self.ssh.runOutput(cmd)
+                    return json.loads(ss)
+                else:
+                    # 아래 세개 명령을 합쳐서 한번에 수행하자 - 얼마나 차이날라나 2.35 -> 2.13
+                    # makeFile(self.ssh, json.dumps(pk), '/tmp/sermon_%s.cmd' % self.dkName)
+                    # self.ssh.run('sudo docker cp /tmp/sermon_{0}.cmd {0}:/tmp/sermon.cmd'.format(self.dkName))
+                    # ss = self.dkRun('/tmp/sermon.py /tmp/sermon.cmd')
+                    cmd = makeFileCmd(json.dumps(pk), f"/tmp/sermon_{self.dkName}.cmd")
+                    cmd += " && "
+                    cmd += f"sudo docker cp /tmp/sermon_{self.dkName}.cmd {self.dkName}:/tmp/sermon.cmd"
+                    cmd += " && "
+                    cmd += self.dkRunCmd("/tmp/sermon.py /tmp/sermon.cmd")
+                    ss = self.ssh.runOutput(cmd)
+                    return json.loads(ss)
+            except Exception:
+                if i == 2:
+                    raise
+
+                # File "/usr/local/lib/python3.8/dist-packages/paramiko/transport.py", line 1013, in open_channel
+                # raise SSHException("SSH session not active")
+                # paramiko.ssh_exception.SSHException: SSH session not active
+                self.init()
 
     def loop(self):
         while True:
