@@ -105,23 +105,6 @@ class myGod:
 
             env.copyFile(f"config/base-{remote.server.name}.yml", "/app/current/config/my.yml")
 
-            # with open(f"config/base-{remote.server.name}.yml", "r") as fp:
-            #     cfg = yaml.safe_load(fp.read())
-            ss = env.runOutput("cat /app/current/config/my.yml")
-            cfg = yaml.safe_load(ss)
-
-            # register ssh key of sermon
-            # pub = remote.runOutput(f"sudo cat /home/{remote.server.owner}/.ssh/id_rsa.pub")
-            pub = env.runOutput(f"sudo cat /root/.ssh/id_rsa.pub")
-            for server in cfg["servers"]:
-                arr = server["url"].split(":")
-                host = arr[0]
-                port = int(arr[1]) if len(arr) >= 2 else 22
-                dkName = server.get("dkName", None)
-                dkId = server.get("dkId", None)
-                ser = env.remoteConn(host=host, port=port, id=server["id"], dkName=dkName, dkId=dkId)
-                my.registerAuthPub(ser, id=server["id"], pub=pub)
-
         # 이미지는 모두 동일하고, 환경은 실행할때 변수로 주자
         my.dockerUpdateImage(
             remote,
@@ -151,6 +134,18 @@ class myGod:
             # env = yaml.safe_load(fp.read())
             ss = dk.runOutput("cat /app/current/config/my.yml")
             cfg = yaml.safe_load(ss)
+
+            # register ssh key of sermon - 이거 키 보존해야한다 매번 바뀌면 안됨
+            # pub = remote.runOutput(f"sudo cat /home/{remote.server.owner}/.ssh/id_rsa.pub")
+            pub = dk.runOutput(f"sudo cat /root/.ssh/id_rsa.pub")
+            for server in cfg["servers"]:
+                arr = server["url"].split(":")
+                host = arr[0]
+                port = int(arr[1]) if len(arr) >= 2 else 22
+                dkName = server.get("dkName", None)
+                dkId = server.get("dkId", None)
+                ser = dk.remoteConn(host=host, port=port, id=server["id"], dkName=dkName, dkId=dkId)
+                my.registerAuthPub(ser, id=server["id"], pub=pub)
 
             my.writeRunScript(
                 dk,
