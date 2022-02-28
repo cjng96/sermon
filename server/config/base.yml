@@ -9,8 +9,8 @@ notification:
     - cjng96@gmail.com
 
 servers:
-  - name: aws1
-    url: aws1.server.com
+  - name: local
+    url: localhost
     id: cjng96
     monitor:
       - cpu

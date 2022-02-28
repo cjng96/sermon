@@ -246,6 +246,12 @@ class Http:
                 "*": opt,
             },
         )
+        cors.add(
+            resCmd.add_route("GET", lambda req: self.httpCmd(req)),
+            {
+                "*": opt,
+            },
+        )
 
         runner = web.AppRunner(app)
         loop.run_until_complete(runner.setup())
@@ -270,7 +276,8 @@ class Http:
         for ser in servers:
             result.append(ser.getStatus())
 
-        return web.Response(text=json.dumps(result))
+        # return web.Response(text=json.dumps(result))
+        return web.json_response(result)
 
     async def httpCmd(self, req):
         peername = req.transport.get_extra_info("peername")
@@ -297,10 +304,17 @@ class Http:
         ss = await req.read()  # json
         ss = ss.decode()
         if ss == "":
-            return web.Response(status=500, text="invalid request")
+            query = req.rel_url.query
+            print(f"http cmd(query) -> ${query}")
+            cmdType = query.get("type")
+            if cmdType is None:
+                return web.Response(status=500, text="invalid request")
 
-        print("http cmd ->", ss)
-        pk = json.loads(ss)
+            pk = {"type": cmdType}
+        else:
+            print("http cmd(body) ->", ss)
+            pk = json.loads(ss)
+
         try:
             tt = pk["type"]
             if tt == "test":
@@ -309,12 +323,15 @@ class Http:
                 return await self.cmdStatus(req)
             else:
                 raise Error("invalid cmd type[%s]" % tt)
+
         except Error as e:
-            return web.Response(text=json.dumps(dict(err="error - %s" % e)))
+            # return web.Response(text=json.dumps(dict(err="error - %s" % e)))
+            return web.json_response(dict(err="error - %s" % e))
 
         except Exception as e:
             self.logE("exc - %s" % e, e)
-            return web.Response(text=json.dumps(dict(err="exception - %s" % e)))
+            # return web.Response(text=json.dumps(dict(err="exception - %s" % e)))
+            return web.json_response(dict(err="exception - %s" % e))
 
     def httpWs(self, req):
         pass
