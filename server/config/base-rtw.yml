@@ -39,6 +39,7 @@ servers:
       - mem
       - swap
       - disk
+      - { type: app, name: retrache, status: /tmp/retrache.st }
 
   - name: secure
     url: secure.retailtrend.net
