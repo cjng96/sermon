@@ -136,8 +136,12 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
             lst.add(Text('${ser.name} - '));
 
             for (var item in ser.items) {
-              final txt = Text('${item.name}: ${item.v} ',
-                  textAlign: TextAlign.left, style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black));
+              final txt = Text(
+                '${item.name}: ${item.v} ',
+                textAlign: TextAlign.left,
+                style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black),
+                maxLines: 1000,
+              );
               lst.add(txt);
             }
 
@@ -159,21 +163,26 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
               }
 
               if (lstRows.length > 0) {
-                lstRows.insert(0, Row(children: children));
+                lstRows.insert(0, Wrap(children: children));
                 lstGroup.add(Column(children: lstRows));
               } else {
-                lstGroup.add(Row(children: children));
+                lstGroup.add(Wrap(children: children));
               }
             }
 
             if (lstGroup.length == 0) {
+              // 서버만 존재하는 경우
               return ListTile(
                 title: Row(children: lst),
               );
             } else {
               lstGroup.insert(0, Row(children: lst));
               return ListTile(
-                title: Column(children: lstGroup),
+                title: Column(
+                  children: lstGroup,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                ),
               );
             }
           }),
