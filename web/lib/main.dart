@@ -132,8 +132,8 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
           itemCount: servers.length,
           itemBuilder: (context, index) {
             final ser = servers[index];
-            final lst = <Widget>[];
-            lst.add(Text('${ser.name} - '));
+            final serverItems = <Widget>[];
+            serverItems.add(Text('${ser.name} - '));
 
             for (var item in ser.items) {
               final txt = Text(
@@ -142,44 +142,58 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                 style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black),
                 maxLines: 1000,
               );
-              lst.add(txt);
+              serverItems.add(txt);
             }
 
-            final lstGroup = <Widget>[];
+            final appList = <Widget>[];
             //for(var i = 0; i < ser.groups.length; ++i) {
             //  final group = ser.groups[i];
             for (var group in ser.groups) {
-              final children = <Widget>[];
-              children.add(Text('  ${group.name} -> ', textAlign: TextAlign.left));
+              // group.items.insert(3, StItem('__sp', false, 'newline'));
+
+              var appItems = <Widget>[];
+              appItems.add(Text('  ${group.name} -> ', textAlign: TextAlign.left));
 
               final lstRows = <Widget>[]; // 별도 행으로 표시할 아이템은 여기에
               print('item - ${group.items}');
               if (group.items != null) {
                 for (var item in group.items) {
+                  if (item.name == '__sp') {
+                    if (item.v == 'newline') {
+                      lstRows.add(Wrap(children: appItems));
+                      appItems = <Widget>[SizedBox(width: 30)];
+                    }
+                    continue;
+                  }
                   final txt = Text('${item.name}: ${item.v} ',
                       textAlign: TextAlign.left, style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black));
-                  children.add(txt);
+                  appItems.add(txt);
                 }
               }
 
-              if (lstRows.length > 0) {
-                lstRows.insert(0, Wrap(children: children));
-                lstGroup.add(Column(children: lstRows));
-              } else {
-                lstGroup.add(Wrap(children: children));
+              // if (lstRows.length > 0) {
+              if (appItems.isNotEmpty) {
+                lstRows.add(Wrap(children: appItems));
               }
+              appList.add(Column(
+                children: lstRows,
+                crossAxisAlignment: CrossAxisAlignment.start,
+              ));
+              // } else {
+              // appList.add(Wrap(children: appItems));
+              // }
             }
 
-            if (lstGroup.length == 0) {
+            if (appList.length == 0) {
               // 서버만 존재하는 경우
               return ListTile(
-                title: Row(children: lst),
+                title: Row(children: serverItems),
               );
             } else {
-              lstGroup.insert(0, Row(children: lst));
+              appList.insert(0, Row(children: serverItems));
               return ListTile(
                 title: Column(
-                  children: lstGroup,
+                  children: appList,
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                 ),
