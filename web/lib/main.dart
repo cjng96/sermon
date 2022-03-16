@@ -145,35 +145,47 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
               serverItems.add(txt);
             }
 
+            var cellCnt = 0;
+
             final appList = <Widget>[];
             //for(var i = 0; i < ser.groups.length; ++i) {
             //  final group = ser.groups[i];
             for (var group in ser.groups) {
               // group.items.insert(3, StItem('__sp', false, 'newline'));
 
-              var appItems = <Widget>[];
-              appItems.add(Text('  ${group.name} -> ', textAlign: TextAlign.left));
+              var items = <Widget>[];
+              items.add(Text('  ${group.name} -> ', textAlign: TextAlign.left));
 
               final lstRows = <Widget>[]; // 별도 행으로 표시할 아이템은 여기에
               print('item - ${group.items}');
               if (group.items != null) {
                 for (var item in group.items) {
-                  if (item.name == '__sp') {
-                    if (item.v == 'newline') {
-                      lstRows.add(Wrap(children: appItems));
-                      appItems = <Widget>[SizedBox(width: 30)];
-                    }
+                  if (item.name == '__grid') {
+                    cellCnt = int.parse(item.v);
+                    lstRows.add(Wrap(children: items));
+                    items = <Widget>[SizedBox(width: 30)];
                     continue;
                   }
                   final txt = Text('${item.name}: ${item.v} ',
                       textAlign: TextAlign.left, style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black));
-                  appItems.add(txt);
+                  if (cellCnt == 0) {
+                    items.add(txt);
+                  } else {
+                    items.add(txt);
+                    if (items.length - 1 >= cellCnt) {
+                      for (var i = 1; i < items.length; ++i) {
+                        items[i] = Expanded(child: items[i]);
+                      }
+                      lstRows.add(Row(children: items));
+                      items = <Widget>[SizedBox(width: 30)];
+                    }
+                  }
                 }
               }
 
               // if (lstRows.length > 0) {
-              if (appItems.isNotEmpty) {
-                lstRows.add(Wrap(children: appItems));
+              if (items.isNotEmpty) {
+                lstRows.add(Wrap(children: items));
               }
               appList.add(Column(
                 children: lstRows,
