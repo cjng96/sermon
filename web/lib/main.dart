@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:json_annotation/json_annotation.dart';
@@ -94,7 +95,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
     // if (kReleaseMode) {
     const url = String.fromEnvironment('SERVER_URL', defaultValue: 'http://localhost:25090/cmd');
 
-    final res = await http.post(url, body: ss).timeout(const Duration(seconds: 30));
+    final res = await http.post(Uri.parse(url), body: ss).timeout(const Duration(seconds: 30));
     if (res.statusCode != 200) {
       throw Exception('http error code - ${res.statusCode} - [${res.body}]');
     }
@@ -124,7 +125,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    Widget body = Scaffold(
       appBar: AppBar(
         title: Text('sermon app'),
       ),
@@ -218,5 +219,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
         child: Icon(Icons.add),
       ),
     );
+
+    return body;
   }
 }
