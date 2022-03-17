@@ -30,6 +30,7 @@ servers:
       - swap
       - disk
       - { type: app, name: retrache, status: /tmp/retrache.st }
+      - { type: app, name: dxm, status: /tmp/dxm.st }
 
   - name: develop
     url: dev.retailanalysis.cloud
@@ -41,6 +42,7 @@ servers:
       - swap
       - disk
       - { type: app, name: retrache, status: /tmp/retrache.st }
+      - { type: app, name: dxm, status: /tmp/dxm.st }
 
   - name: secure
     url: secure.retailtrend.net

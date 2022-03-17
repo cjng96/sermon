@@ -146,8 +146,6 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
               serverItems.add(txt);
             }
 
-            var cellCnt = 0;
-
             final appList = <Widget>[];
             //for(var i = 0; i < ser.groups.length; ++i) {
             //  final group = ser.groups[i];
@@ -159,6 +157,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
 
               final lstRows = <Widget>[]; // 별도 행으로 표시할 아이템은 여기에
               print('item - ${group.items}');
+              var cellCnt = 0;
               if (group.items != null) {
                 for (var item in group.items) {
                   if (item.name == '__grid') {
@@ -167,6 +166,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                     items = <Widget>[SizedBox(width: 30)];
                     continue;
                   }
+                  // print('name ${item.name} - ${item.v} - $cellCnt');
                   final txt = Text('${item.name}: ${item.v} ',
                       textAlign: TextAlign.left, style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black));
                   if (cellCnt == 0) {
