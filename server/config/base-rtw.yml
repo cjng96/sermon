@@ -31,6 +31,7 @@ servers:
       - disk
       - { type: app, name: retrache, status: /tmp/retrache.st }
       - { type: app, name: dxm, status: /tmp/dxm.st }
+      - { type: app, name: fotaSer, status: /tmp/fotaServer.st }
 
   - name: develop
     url: dev.retailanalysis.cloud
@@ -43,6 +44,7 @@ servers:
       - disk
       - { type: app, name: retrache, status: /tmp/retrache.st }
       - { type: app, name: dxm, status: /tmp/dxm.st }
+      - { type: app, name: fotaSer, status: /tmp/fotaServer.st }
 
   - name: secure
     url: secure.retailtrend.net
