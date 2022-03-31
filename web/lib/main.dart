@@ -186,7 +186,18 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
 
               // if (lstRows.length > 0) {
               if (items.isNotEmpty) {
-                lstRows.add(Wrap(children: items));
+                if (cellCnt == 0) {
+                  lstRows.add(Wrap(children: items));
+                } else {
+                  for (var i = 1; i < items.length; ++i) {
+                    items[i] = Expanded(child: items[i]);
+                  }
+                  final remain = cellCnt - (items.length - 1) % cellCnt;
+                  for (var i = 0; i < remain; ++i) {
+                    items.add(Expanded(child: SizedBox()));
+                  }
+                  lstRows.add(Row(children: items));
+                }
               }
               appList.add(Column(
                 children: lstRows,
