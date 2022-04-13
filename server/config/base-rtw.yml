@@ -29,6 +29,7 @@ servers:
       - mem
       - swap
       - disk
+      - { type: app, name: dbapi, status: /tmp/dbapi.st }
       - { type: app, name: dxm, status: /tmp/dxm.st }
       - { type: app, name: fotaSer, status: /tmp/fotaServer.st }
       - { type: app, name: retrache, status: /tmp/retrache.st }
