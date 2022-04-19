@@ -1,3 +1,11 @@
+'''
+키 날아가면, 
+docker exec -it sermon cat /root/.ssh/id_rsa.pub
+
+rtd cjng96
+vi .ssh/authorized_keys
+
+'''
 port: 25090
 domain: watchmon.ucount.it
 
