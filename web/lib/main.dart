@@ -4,9 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
-
-part 'main.g.dart';
 
 void main() => runApp(MyApp());
 
@@ -30,34 +29,44 @@ class ServerStatusPage extends StatefulWidget {
   _ServerStatusPageState createState() => _ServerStatusPageState();
 }
 
-@JsonSerializable()
 class StItem {
   StItem(this.name, this.alertFlag, this.v);
-  factory StItem.fromJson(Map<String, dynamic> json) => _$StItemFromJson(json);
-  Map<String, dynamic> toJson() => _$StItemToJson(this);
+  factory StItem.fromJson(Map<String, dynamic> json) =>
+      StItem(json['name'] as String, json['alertFlag'] as bool, json['v'] as String);
+  Map<String, dynamic> toJson() => <String, dynamic>{'name': name, 'alertFlag': alertFlag, 'v': v};
 
   String name;
   bool alertFlag;
   String v;
 }
 
-@JsonSerializable(explicitToJson: true)
 class StGroup {
   StGroup(this.name, this.items);
-  factory StGroup.fromJson(Map<String, dynamic> json) => _$StGroupFromJson(json);
-  Map<String, dynamic> toJson() => _$StGroupToJson(this);
+  factory StGroup.fromJson(Map<String, dynamic> json) => StGroup(json['name'] as String,
+      (json['items'] as List)?.map((e) => e == null ? null : StItem.fromJson(e as Map<String, dynamic>))?.toList());
+  Map<String, dynamic> toJson() => <String, dynamic>{'name': name, 'items': items?.map((e) => e?.toJson())?.toList()};
 
   String name;
   List<StItem> items;
 }
 
-@JsonSerializable(explicitToJson: true)
 class StServer {
-  StServer(this.name, this.items, this.groups);
-  factory StServer.fromJson(Map<String, dynamic> json) => _$StServerFromJson(json);
-  Map<String, dynamic> toJson() => _$StServerToJson(this);
+  StServer(this.name, this.ts, this.items, this.groups);
+  factory StServer.fromJson(Map<String, dynamic> json) => StServer(
+      json['name'] as String,
+      json['ts'] as int,
+      (json['items'] as List)?.map((e) => e == null ? null : StItem.fromJson(e as Map<String, dynamic>))?.toList(),
+      (json['groups'] as List)?.map((e) => e == null ? null : StGroup.fromJson(e as Map<String, dynamic>))?.toList());
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'name': name,
+        'ts': ts,
+        'items': items?.map((e) => e?.toJson())?.toList(),
+        'groups': groups?.map((e) => e?.toJson())?.toList()
+      };
 
   String name;
+  int ts;
   List<StItem> items;
   List<StGroup> groups;
 }
@@ -86,7 +95,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
     try {
       await doStatus();
     } catch (e) {
-      // print(e);
+      print(e);
     }
     setState(() {});
   }
@@ -97,7 +106,9 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
 
     // var url = 'http://localhost:25090/cmd';
     // if (kReleaseMode) {
-    const url = String.fromEnvironment('SERVER_URL', defaultValue: 'http://localhost:25090/cmd');
+    const url = kReleaseMode
+        ? String.fromEnvironment('SERVER_URL', defaultValue: 'http://localhost:25090/cmd')
+        : 'http://watchmon.ucount.it/cmd';
 
     final res = await http.post(Uri.parse(url), body: ss).timeout(const Duration(seconds: 30));
     if (res.statusCode != 200) {
@@ -129,6 +140,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
 
   @override
   Widget build(BuildContext context) {
+    Widget pre = SizedBox(width: 30);
     Widget body = Scaffold(
       appBar: AppBar(
         title: Text('sermon app'),
@@ -138,8 +150,13 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
           itemBuilder: (context, index) {
             final ser = servers[index];
             final serverItems = <Widget>[];
-            serverItems.add(Text('${ser.name} - '));
+            final df = DateFormat('MM-dd HH:mm:ss');
+            var ss = DateTime.fromMillisecondsSinceEpoch(ser.ts * 1000);
+            serverItems.add(Text('${ser.name}', style: TextStyle(color: Colors.blue)));
 
+            serverItems.add(Text(' (${df.format(ss)})', style: TextStyle(fontSize: 14, color: Colors.grey)));
+
+            final rootItems = <Widget>[Text('  ')];
             for (var item in ser.items) {
               final txt = Text(
                 '${item.name}: ${item.v} ',
@@ -147,15 +164,11 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                 style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black),
                 maxLines: 1000,
               );
-              serverItems.add(txt);
+              rootItems.add(txt);
             }
 
             final appList = <Widget>[];
-            //for(var i = 0; i < ser.groups.length; ++i) {
-            //  final group = ser.groups[i];
             for (var group in ser.groups) {
-              // group.items.insert(3, StItem('__sp', false, 'newline'));
-
               var items = <Widget>[];
               items.add(Text('  ${group.name} -> ', textAlign: TextAlign.left));
 
@@ -167,7 +180,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                   if (item.name == '__grid') {
                     cellCnt = int.parse(item.v);
                     lstRows.add(Wrap(children: items));
-                    items = <Widget>[SizedBox(width: 30)];
+                    items = <Widget>[pre];
                     continue;
                   }
                   // print('name ${item.name} - ${item.v} - $cellCnt');
@@ -182,7 +195,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                         items[i] = Expanded(child: items[i]);
                       }
                       lstRows.add(Row(children: items));
-                      items = <Widget>[SizedBox(width: 30)];
+                      items = <Widget>[pre];
                     }
                   }
                 }
@@ -207,26 +220,18 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                 children: lstRows,
                 crossAxisAlignment: CrossAxisAlignment.start,
               ));
-              // } else {
-              // appList.add(Wrap(children: appItems));
-              // }
             }
 
-            if (appList.length == 0) {
-              // 서버만 존재하는 경우
-              return ListTile(
-                title: Row(children: serverItems),
-              );
-            } else {
-              appList.insert(0, Row(children: serverItems));
-              return ListTile(
-                title: Column(
-                  children: appList,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                ),
-              );
-            }
+            appList.insert(0, Row(children: serverItems));
+            appList.insert(1, Row(children: rootItems));
+            return ListTile(
+              title: Column(
+                children: appList,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+            );
+            // }
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: _refresh,

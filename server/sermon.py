@@ -45,6 +45,7 @@ class Server:
         self.dkName = None
         self.dkId = None
         self.name = self.cfg["name"]
+        self.ts = 0
         print("server: %s[%s]" % (self.name, cfg["url"]))
 
         self.status = None
@@ -107,7 +108,7 @@ class Server:
         items = []
         groups = []
         if self.status is None:
-            return dict(name=self.name, items=[dict(v="loading...")], groups=[])
+            return dict(name=self.name, items=[dict(name="loading", v="...")], groups=[])
 
         for item in self.cfg["monitor"]:
             if type(item) == str:
@@ -170,7 +171,7 @@ class Server:
 
                     groups.append(dict(name=name, items=lst))
 
-        return dict(name=self.name, items=items, groups=groups)
+        return dict(name=self.name, ts=int(self.ts), items=items, groups=groups)
 
     def dkRunCmd(self, cmd):
         dkRunUser = "-u %s" % self.dkId if self.dkId is not None else ""
@@ -222,6 +223,7 @@ class Server:
 
                 # arr.append(dict(cmd='systemStatus'))
                 self.status = self.run(self.cfg["monitor"])
+                self.ts = time.time()
                 print("%s: result - %s" % (self.name, self.status))
 
             except Exception as e:

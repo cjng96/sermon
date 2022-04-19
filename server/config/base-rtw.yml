@@ -1,11 +1,9 @@
-'''
-키 날아가면, 
-docker exec -it sermon cat /root/.ssh/id_rsa.pub
+# 키 날아가면,
+# docker exec -it sermon cat /root/.ssh/id_rsa.pub
 
-rtd cjng96
-vi .ssh/authorized_keys
+# rtd cjng96
+# vi .ssh/authorized_keys
 
-'''
 port: 25090
 domain: watchmon.ucount.it
 
@@ -38,7 +36,7 @@ servers:
       - swap
       - disk
       - { type: disk, name: mongo, path: /var/lib/mongo }
-      # - { type: disk, name: mariadb, path: /var/lib/mysql }
+      # - { type: disk, name: maria, path: /var/lib/mysql }
       - { type: disk, name: retrache, path: /mnt/retrache }
       - { type: app, name: dbapi, status: /tmp/dbapi.st }
       - { type: app, name: dxm, status: /tmp/dxm.st }
@@ -55,7 +53,7 @@ servers:
       - swap
       - disk
       - { type: disk, name: mongo, path: /var/lib/mongo }
-      - { type: disk, name: mariadb, path: /var/lib/mysql }
+      - { type: disk, name: maria, path: /var/lib/mysql }
       - { type: disk, name: retrache, path: /mnt/retrache }
       - { type: app, name: dbapi, status: /tmp/dbapi.st }
       - { type: app, name: dxm, status: /tmp/dxm.st }
