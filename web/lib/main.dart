@@ -83,7 +83,11 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
   List<StServer> servers = [];
 
   Future<void> _refresh() async {
-    await doStatus();
+    try {
+      await doStatus();
+    } catch (e) {
+      // print(e);
+    }
     setState(() {});
   }
 
