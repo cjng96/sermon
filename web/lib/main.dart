@@ -150,7 +150,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
           itemBuilder: (context, index) {
             final ser = servers[index];
             final serverItems = <Widget>[];
-            final df = DateFormat('MM-dd HH:mm:ss');
+            final df = DateFormat('MMdd HH:mm:ss');
             var ss = DateTime.fromMillisecondsSinceEpoch(ser.ts * 1000);
             serverItems.add(Text('${ser.name}', style: TextStyle(color: Colors.blue)));
 
