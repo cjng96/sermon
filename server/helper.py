@@ -46,7 +46,15 @@ def main():
                         result[item] = "unknown type[%s]" % item
                 elif isinstance(item, dict):
                     tt = item["type"]
-                    if tt == "app":
+                    if tt == "disk":
+                        path = item["path"]
+                        dd = psutil.disk_usage(path)
+
+                        if "disks" not in result:
+                            result["disks"] = dict()
+                        result["disks"][item["name"]] = dict(total=dd[0], used=dd[1], free=dd[2])
+
+                    elif tt == "app":
                         if "apps" not in result:
                             result["apps"] = dict()
 

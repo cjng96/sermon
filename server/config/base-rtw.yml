@@ -29,6 +29,9 @@ servers:
       - mem
       - swap
       - disk
+      - { type: disk, name: mongo, path: /var/lib/mongo }
+      # - { type: disk, name: mariadb, path: /var/lib/mysql }
+      - { type: disk, name: retrache, path: /mnt/retrache }
       - { type: app, name: dbapi, status: /tmp/dbapi.st }
       - { type: app, name: dxm, status: /tmp/dxm.st }
       - { type: app, name: fotaSer, status: /tmp/fotaServer.st }
@@ -43,6 +46,9 @@ servers:
       - mem
       - swap
       - disk
+      - { type: disk, name: mongo, path: /var/lib/mongo }
+      - { type: disk, name: mariadb, path: /var/lib/mysql }
+      - { type: disk, name: retrache, path: /mnt/retrache }
       - { type: app, name: dbapi, status: /tmp/dbapi.st }
       - { type: app, name: dxm, status: /tmp/dxm.st }
       - { type: app, name: fotaSer, status: /tmp/fotaServer.st }
