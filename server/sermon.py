@@ -113,7 +113,9 @@ class Server:
         for item in self.cfg["monitor"]:
             if type(item) == str:
                 vv = self.status[item]
-                if item == "cpu":
+                if item == "newline":
+                    items.append(dict(name="newline", type="sp"))
+                elif item == "cpu":
                     items.append(dict(name=item, v="%.1f%%" % vv, alertFlag=False))  # vv > 80))
                 elif item == "load":
                     avg = vv["avg"]

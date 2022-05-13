@@ -44,6 +44,7 @@ servers:
       - swap
       - disk
       - { type: mdadm, name: md0r, path: /dev/md0 }
+      - newline
       - { type: disk, name: w, path: /media/w }
       - { type: disk, name: md0, path: /media/md0 }
       - { type: disk, name: bk, path: /media/bk }

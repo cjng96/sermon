@@ -30,12 +30,22 @@ class ServerStatusPage extends StatefulWidget {
 }
 
 class StItem {
-  StItem(this.name, this.alertFlag, this.v);
-  factory StItem.fromJson(Map<String, dynamic> json) =>
-      StItem(json['name'] as String, json['alertFlag'] as bool, json['v'] as String);
-  Map<String, dynamic> toJson() => <String, dynamic>{'name': name, 'alertFlag': alertFlag, 'v': v};
+  StItem(this.name, this.alertFlag, this.type, this.v);
+  factory StItem.fromJson(Map<String, dynamic> json) => StItem(
+        json['name'] as String,
+        json['alertFlag'] as bool,
+        json['type'] as String ?? '',
+        json['v'] as String,
+      );
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'name': name,
+        'type': type,
+        'alertFlag': alertFlag,
+        'v': v,
+      };
 
   String name;
+  String type; // ''(일반적), 'sp'(newline등)
   bool alertFlag;
   String v;
 }
@@ -153,22 +163,32 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
             final df = DateFormat('MMdd HH:mm:ss');
             var ss = DateTime.fromMillisecondsSinceEpoch(ser.ts * 1000);
             serverItems.add(Text('${ser.name}', style: TextStyle(color: Colors.blue)));
-
             serverItems.add(Text(' (${df.format(ss)})', style: TextStyle(fontSize: 14, color: Colors.grey)));
 
-            final rootItems = <Widget>[Text('  ')];
-            for (var item in ser.items) {
-              final txt = Text(
-                '${item.name}: ${item.v} ',
-                textAlign: TextAlign.left,
-                style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black),
-                maxLines: 1000,
-              );
-              rootItems.add(txt);
+            final rootRows = [];
+            var rootItems = <Widget>[Text('  ')];
+            rootRows.add(rootItems);
+            for (final item in ser.items) {
+              if (item.type == 'sp') {
+                switch (item.name) {
+                  case 'newline':
+                    rootItems = <Widget>[Text('  ')];
+                    rootRows.add(rootItems);
+                    break;
+                }
+              } else {
+                final txt = Text(
+                  '${item.name}: ${item.v} ',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(color: item.alertFlag ? Colors.red : Colors.black),
+                  maxLines: 1000,
+                );
+                rootItems.add(txt);
+              }
             }
 
             final appList = <Widget>[];
-            for (var group in ser.groups) {
+            for (final group in ser.groups) {
               var items = <Widget>[];
               items.add(Text('  ${group.name} -> ', textAlign: TextAlign.left));
 
@@ -223,7 +243,10 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
             }
 
             appList.insert(0, Row(children: serverItems));
-            appList.insert(1, Row(children: rootItems));
+            for (var i = 0; i < rootRows.length; ++i) {
+              final row = rootRows[i];
+              appList.insert(i + 1, Row(children: row));
+            }
             return ListTile(
               title: Column(
                 children: appList,
