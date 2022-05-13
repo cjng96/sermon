@@ -133,14 +133,21 @@ class Server:
                     print("unknown item[%s]" % item)
 
             elif type(item) == dict:
-                if item["type"] == "disk":
+                tt = item["type"]
+                if tt == "disk":
                     name = item["name"]
                     vv = self.status["disks"][name]
 
                     st = "%dG/%dG" % (vv["used"] / 1024 / 1024 / 1024, vv["total"] / 1024 / 1024 / 1024)
                     items.append(dict(name=name, v=st, alertFlag=vv["free"] < 1024 * 1024 * 1024 * 5))
+                elif tt == "mdadm":
+                    name = item["name"]
+                    vv = self.status["mdadms"][name]
 
-                elif item["type"] == "app":
+                    st = "%d/%d" % (vv["act"], vv["tot"])
+                    items.append(dict(name=name, v=st, alertFlag=vv["act"] != vv["tot"]))
+
+                elif tt == "app":
                     name = item["name"]
                     vv = self.status["apps"][name]
                     lst = []

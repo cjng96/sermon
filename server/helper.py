@@ -6,6 +6,9 @@ import os, sys
 import json
 import asyncio
 import psutil
+import re
+import subprocess
+import traceback
 
 # import aiohttp
 # from aiohttp import web
@@ -24,7 +27,7 @@ def main():
 
             pk = json.loads(ss)
 
-            log.write("cmd %s\n" % ss)
+            log.write(f"cmd {ss}\n")
 
             result = {}
             for item in pk:
@@ -53,6 +56,21 @@ def main():
                         if "disks" not in result:
                             result["disks"] = dict()
                         result["disks"][item["name"]] = dict(total=dd[0], used=dd[1], free=dd[2])
+                    elif tt == "mdadm":
+                        path = item["path"]
+                        ss = (
+                            subprocess.check_output(["sudo", "mdadm", "--detail", path], stderr=subprocess.STDOUT)
+                            .decode()
+                            .strip()
+                        )
+                        m = re.search(r"Total Devices : (\d+)", ss)
+                        tot = int(m.group(1))
+                        m = re.search(r"Active Devices : (\d+)", ss)
+                        act = int(m.group(1))
+
+                        if "mdadms" not in result:
+                            result["mdadms"] = dict()
+                        result["mdadms"][item["name"]] = dict(tot=tot, act=act)
 
                     elif tt == "app":
                         if "apps" not in result:
@@ -66,13 +84,18 @@ def main():
                             st = dict(err=dict(v=str(e), alertFlag=True))
 
                         result["apps"][item["name"]] = st
+                    else:
+                        # result[''] = "unknown type[%s]" % item
+                        raise Exception(f"unknown dict type[{tt}]")
+
                 else:
                     result["err"] = dict(v="unknown monitor data type[%s]!!" % type(item), alertFlag=True)
 
             log.write("result %s\n" % json.dumps(result))
             print(json.dumps(result))
         except Exception as e1:
-            log.write("exc - %s" % e1)
+            tb = traceback.format_exc()
+            log.write(f"exc - {tb}")
 
 
 if __name__ == "__main__":
