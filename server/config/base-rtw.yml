@@ -10,6 +10,7 @@
 
 port: 25090
 domain: watchmon.ucount.it
+name: Earlgrey monitoring
 
 notification:
   type: gmail

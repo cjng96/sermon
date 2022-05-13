@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -99,6 +101,7 @@ String duration2str(Duration d) {
 }
 
 class _ServerStatusPageState extends State<ServerStatusPage> {
+  String name;
   List<StServer> servers = [];
 
   Future<void> _refresh() async {
@@ -124,11 +127,14 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
     if (res.statusCode != 200) {
       throw Exception('http error code - ${res.statusCode} - [${res.body}]');
     }
-    final map = json.decode(res.body) as List<dynamic>;
+    final map = json.decode(res.body) as Map;
     print('map - $map');
 
+    name = map['name'] as String;
+
     List<StServer> newServers = [];
-    for (final item in map) {
+    final serverList = map['servers'] as List;
+    for (final item in serverList) {
       newServers.add(StServer.fromJson(item));
     }
     servers = newServers;
@@ -150,10 +156,12 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
 
   @override
   Widget build(BuildContext context) {
+    var safeName = name ?? 'sermon';
+    document.title = safeName;
     Widget pre = SizedBox(width: 30);
     Widget body = Scaffold(
       appBar: AppBar(
-        title: Text('sermon app'),
+        title: Text(safeName),
       ),
       body: ListView.builder(
           itemCount: servers.length,

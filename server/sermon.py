@@ -290,12 +290,12 @@ class Http:
         return web.Response(text="hello")
 
     async def cmdStatus(self, req):
-        result = []
+        results = []
         for ser in servers:
-            result.append(ser.getStatus())
+            results.append(ser.getStatus())
 
         # return web.Response(text=json.dumps(result))
-        return web.json_response(result)
+        return web.json_response({"name": g_cfg["name"], "servers": results})
 
     async def httpCmd(self, req):
         peername = req.transport.get_extra_info("peername")
