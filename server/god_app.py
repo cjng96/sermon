@@ -29,7 +29,7 @@ defaultVars:
 servers:
   - name: mmx
     host: nas.mmx.kr
-    port: 7022
+    port: 13522
     id: cjng96
     # dkName: ser
     # dkId: cjng96

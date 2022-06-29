@@ -22,14 +22,14 @@ deploy:
 servers:
   - name: mmx
     host: nas.mmx.kr
-    port: 7022
+    port: 13522
     id: cjng96
     dkName: web
     # dkId: cjng96
     #owner: websert
     deployRoot: /data/sermon
     vars:
-      serverUrl: https://sermon.mmx.kr/cmd
+      serverUrl: https://sermon.mmx.kr:33/cmd
 
   - name: rtw
     host: watchmon.ucount.it

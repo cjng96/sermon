@@ -36,7 +36,7 @@ servers:
       - { type: app, name: collAdmin, status: /work/collAdmin/collAdmin.st }
 
   - name: n2
-    url: nas.mmx.kr:7022
+    url: nas.mmx.kr:13522
     id: cjng96
     monitor:
       # - cpu
