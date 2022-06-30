@@ -169,8 +169,28 @@ exec python3 -u sermon.py
                 privateApi="/api/pcmd",
                 privateFilter="""\
 allow 172.0.0.0/8; # docker""",
-                certSetup=remote.server.name != "rtw",
+                # certSetup=remote.server.name != "rtw",
+                certSetup=False,
             )
+
+            if remote.server.name == 'mmx':
+                d21 = remote.remoteConn("rt.mmx.kr", port=20422, id="root")
+
+                # 인증서만 얻어올까?
+                my.setupProxyForNginx(
+                    d21,
+                    name="sermon",
+                    domain=remote.vars.domain,
+                    certAdminEmail="cjng96@gmail.com",
+                    proxyUrl="http://192.168.1.135",
+                    nginxCfgPath="/etc/nginx/sites-enabled",
+                    buffering=False,
+                )
+
+                # 일단 d21 proxy, direct 둘다 지원한다
+                # cron으로 주기적으로 가져와야한다
+                # ssh root@192.168.1.204
+                my.certbotCopy(d21, web, domain=remote.vars.domain, cfgName='sermon')
 
     def deployPreTask(self, util, remote, local, **_):
         # create new user with ssh key
