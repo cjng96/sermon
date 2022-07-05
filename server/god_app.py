@@ -176,16 +176,26 @@ allow 172.0.0.0/8; # docker""",
             if remote.server.name == 'mmx':
                 d21 = remote.remoteConn("rt.mmx.kr", port=20422, id="root")
 
-                # 인증서만 얻어올까?
+                # 인증서만 얻어올까? - 어차피 블럭을 추가해버리기 때문에 설정은 있어야한다
                 my.setupProxyForNginx(
                     d21,
                     name="sermon",
                     domain=remote.vars.domain,
                     certAdminEmail="cjng96@gmail.com",
-                    proxyUrl="http://192.168.1.135",
+                    proxyUrl="http://192.168.111.135",
                     nginxCfgPath="/etc/nginx/sites-enabled",
                     buffering=False,
                 )
+
+                # 설정이 없으면 다른 설정에 server block을 추가해버린다
+                # certbotSetup(
+                #     d21,
+                #     domainStr=remote.vars.domain,
+                #     email='cjng96@gmail.com',
+                #     name='sermon',
+                #     httpRedirect=False,
+                #     nginxCfgPath='/etc/nginx/sites-enabled',
+                # )
 
                 # 일단 d21 proxy, direct 둘다 지원한다
                 # cron으로 주기적으로 가져와야한다
