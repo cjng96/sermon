@@ -41,7 +41,7 @@ servers:
       webDocker: web
       root: /data/sermon
 
-  - name: rtw
+  - name: egw
     host: watchmon.ucount.it
     port: 443
     id: ubuntu
