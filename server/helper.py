@@ -29,6 +29,20 @@ def main():
 
             log.write(f"cmd {ss}\n")
 
+            # manager - sa, pm2
+            useSa = False
+            for item in pk:
+                if isinstance(item, dict):
+                    tt = item['type']
+                    if tt == 'app':
+                        if 'saName' in item:
+                            useSa = True
+                            break
+            
+            if useSa:
+                ss = subprocess.check_output('sa ls --json', shell=True)
+                sa = json.loads(ss)
+
             result = {}
             for item in pk:
                 if isinstance(item, str):

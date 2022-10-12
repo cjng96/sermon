@@ -19,8 +19,8 @@ servers:
       - mem
       - swap
       - disk
-      - { type: app, name: eng, status: /work/eng/eng.st }
-      - { type: app, name: engT, status: /work/engt/engt.st }
+      - { type: app, name: eng, status: /work/eng/eng.st, saName: eng, memMax: 50m }
+      - { type: app, name: engT, status: /work/engt/engt.st, saName: engt }
       - { type: app, name: inerAuth, status: /work/iauth/inerAuth.st }
       - { type: app, name: inerAuthT, status: /work/iautht/inerAuthT.st }
       - { type: app, name: inerUpdate, status: /work/iupdate/inerUpdate.st }
