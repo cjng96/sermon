@@ -32,7 +32,7 @@ servers:
       serverUrl: https://sermon.mmx.kr:33/cmd
 
   - name: rtw
-    host: watchmon.ucount.it
+    host: watchmon.retailtrend.net
     port: 443
     id: ubuntu
     dkName: web
@@ -40,7 +40,7 @@ servers:
     #owner: websert
     deployRoot: /data/sermon
     vars:
-      serverUrl: http://watchmon.ucount.it/cmd
+      serverUrl: http://watchmon.retailtrend.net/cmd
 """
 
 import os, sys
@@ -62,7 +62,7 @@ class myGod:
         pass
 
     def deployPreTask(self, util, remote, local, **_):
-        local.run(f"cmd flutter build web --dart-define=SERVER_URL={remote.vars.serverUrl}")
+        local.run(f"fvm flutter build web --dart-define=SERVER_URL={remote.vars.serverUrl}")
 
         # create new user with ssh key
         # remote.userNew(remote.server.owner, existOk=True, sshKey=True)
