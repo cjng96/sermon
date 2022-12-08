@@ -192,7 +192,7 @@ class Server:
         return self.ssh.runOutput(cmd)
 
     def run(self, pk):
-        print("%s: cmd - %s" % (self.name, pk))
+        print(f"{self.name}: cmd - {pk}")
         for i in range(3):
             try:
                 if self.dkName is None:
