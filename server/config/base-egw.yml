@@ -9,7 +9,7 @@
 # sudo pip3 install wheel psutil
 
 port: 25090
-domain: watchmon.ucount.it
+domain: watchmon.retailtrend.net
 name: Earlgrey monitoring
 
 notification:
@@ -21,7 +21,7 @@ notification:
 
 servers:
   - name: watchmon
-    url: watchmon.ucount.it:443
+    url: watchmon.retailtrend.net:443
     id: ubuntu
     monitor:
       # - cpu
@@ -87,8 +87,8 @@ servers:
       - { type: app, name: reportMsgT, status: /work/msgt/app.st }
       - { type: app, name: reportMsg, status: /work/msg/app.st }
 
-  - name: report
-    url: 54.151.14.237
-    id: cjng96
-    monitor:
-      - { type: app, name: excel, status: c:\\work\\excel.st }
+  # - name: report
+  #   url: 54.151.14.237
+  #   id: cjng96
+  #   monitor:
+  #     - { type: app, name: excel, status: c:\\work\\excel.st }

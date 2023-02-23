@@ -46,7 +46,7 @@ class Server:
         self.dkId = None
         self.name = self.cfg["name"]
         self.ts = 0
-        print("server: %s[%s]" % (self.name, cfg["url"]))
+        print(f"server: {self.name} - {cfg['url']}")
 
         self.status = None
 
@@ -233,10 +233,10 @@ class Server:
                 # arr.append(dict(cmd='systemStatus'))
                 self.status = self.run(self.cfg["monitor"])
                 self.ts = time.time()
-                print("%s: result - %s" % (self.name, self.status))
+                print(f"{self.name}: result - {self.status}")
 
             except Exception as e:
-                print("loop exc - ", traceback.format_exc())
+                print(f"{self.name}: loop exc - ", traceback.format_exc())
             time.sleep(30)
 
     def threadStart(self):

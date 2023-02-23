@@ -42,7 +42,8 @@ servers:
       root: /data/sermon
 
   - name: egw
-    host: watchmon.ucount.it
+    host1: watchmon.ucount.it
+    host: watchmon.retailtrend.net
     port: 443
     id: ubuntu
     # dkName: ser
