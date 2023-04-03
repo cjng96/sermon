@@ -171,10 +171,12 @@ exec python3 -u sermon.py
                 privateFilter="""\
 allow 172.0.0.0/8; # docker""",
                 # certSetup=remote.server.name != "rtw",
-                certSetup=False,
+                certSetup=True,
+                localBind=True,
             )
 
-            if remote.server.name == 'mmx':
+            # 이제 n2가 메인이다 - 이제 setupWebApp에서 certSetup직접 함
+            if remote.server.name == 'mmx' and False:
                 d21 = remote.remoteConn("rt.mmx.kr", port=20422, id="root")
 
                 # 인증서만 얻어올까? - 어차피 블럭을 추가해버리기 때문에 설정은 있어야한다
@@ -202,6 +204,7 @@ allow 172.0.0.0/8; # docker""",
                 # cron으로 주기적으로 가져와야한다
                 # ssh root@192.168.1.204
                 my.certbotCopy(d21, web, domain=remote.vars.domain, cfgName='sermon')
+        
 
     def deployPreTask(self, util, remote, local, **_):
         # create new user with ssh key
