@@ -87,8 +87,12 @@ servers:
       - { type: app, name: reportMsgT, status: /work/msgt/app.st }
       - { type: app, name: reportMsg, status: /work/msg/app.st }
 
-  # - name: report
-  #   url: 54.151.14.237
-  #   id: cjng96
-  #   monitor:
-  #     - { type: app, name: excel, status: c:\\work\\excel.st }
+  - name: report
+    url: 54.151.14.237
+    id: cjng96
+    monitor:
+      - load
+      - mem
+      - swap
+      - disk
+      - { type: app, name: excel, status: /mnt/c/work/excel.st }

@@ -52,7 +52,7 @@ servers:
     # deployRoot: /home/{{server.owner}}
     deployRoot: /app
     vars:
-      domain: watchmon.ucount.it
+      domain: watchmon.retailtrend.net
       webDocker: web
       root: /data/sermon
 
@@ -171,7 +171,7 @@ exec python3 -u sermon.py
                 privateFilter="""\
 allow 172.0.0.0/8; # docker""",
                 # certSetup=remote.server.name != "rtw",
-                certSetup=True,
+                certSetup=remote.server.name == 'mmx',  # eg는 http로 쓴다
                 localBind=True,
             )
 
