@@ -43,7 +43,7 @@ servers:
 
   - name: egw
     host1: watchmon.ucount.it
-    host: watchmon.retailtrend.net
+    host: sermon.retailtrend.net
     port: 443
     id: ubuntu
     # dkName: ser
@@ -52,7 +52,7 @@ servers:
     # deployRoot: /home/{{server.owner}}
     deployRoot: /app
     vars:
-      domain: watchmon.retailtrend.net
+      domain: sermon.retailtrend.net
       webDocker: web
       root: /data/sermon
 

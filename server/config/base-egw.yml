@@ -20,8 +20,8 @@ notification:
     - cjng96@gmail.com
 
 servers:
-  - name: watchmon
-    url: watchmon.retailtrend.net:443
+  - name: tool
+    url: sermon.retailtrend.net:443
     id: ubuntu
     monitor:
       # - cpu
