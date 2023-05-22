@@ -1,6 +1,7 @@
 port: 25090
 domain: sermon.mmx.kr
 name: mmx monitor
+fixedFont: false
 
 notification:
   type: gmail

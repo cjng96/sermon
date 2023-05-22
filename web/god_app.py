@@ -31,8 +31,8 @@ servers:
     vars:
       serverUrl: https://sermon.mmx.kr:33/cmd
 
-  - name: rtw
-    host: watchmon.retailtrend.net
+  - name: egw
+    host: sermon.retailtrend.net
     port: 443
     id: ubuntu
     dkName: web
@@ -40,7 +40,7 @@ servers:
     #owner: websert
     deployRoot: /data/sermon
     vars:
-      serverUrl: http://watchmon.retailtrend.net/cmd
+      serverUrl: http://sermon.retailtrend.net/cmd
 """
 
 import os, sys
@@ -82,6 +82,10 @@ class myGod:
         with open("./build/web/index.html", "w") as fp:
             fp.write(ss)
 
+        # canvaskit is 1979 file
+        local.run('touch `find build/web/ -type f`')
+
     def deployPostTask(self, util, remote, local, **_):
+
         # my.nginxWebSite(remote, name='sermon', domain=remote.vars.domain, certAdminEmail='cjng96@gmail.com', root='%s/current' % remote.server.deployRoot, cacheOn=True)
         pass

@@ -81,7 +81,9 @@ class Server:
         if self.dkName is None:
             ssh.run("/usr/bin/pip3 install wheel psutil")
         else:
-            ssh.run("sudo docker cp /tmp/sermon.py {0}:/tmp/sermon.py".format(self.dkName))
+            ssh.run(
+                "sudo docker cp /tmp/sermon.py {0}:/tmp/sermon.py".format(self.dkName)
+            )
             self.dkRun("/usr/bin/pip3 install wheel psutil")
 
         return True
@@ -108,7 +110,9 @@ class Server:
         items = []
         groups = []
         if self.status is None:
-            return dict(name=self.name, items=[dict(name="loading", v="...")], groups=[])
+            return dict(
+                name=self.name, items=[dict(name="loading", v="...")], groups=[]
+            )
 
         for item in self.cfg["monitor"]:
             if type(item) == str:
@@ -116,7 +120,9 @@ class Server:
                 if item == "newline":
                     items.append(dict(name="newline", type="sp"))
                 elif item == "cpu":
-                    items.append(dict(name=item, v="%.1f%%" % vv, alertFlag=False))  # vv > 80))
+                    items.append(
+                        dict(name=item, v="%.1f%%" % vv, alertFlag=False)
+                    )  # vv > 80))
                 elif item == "load":
                     avg = vv["avg"]
                     st = "[%d] %.1f,%.1f,%.1f" % (vv["cnt"], avg[0], avg[1], avg[2])
@@ -129,8 +135,17 @@ class Server:
                     st = "%d%%(%dMB)" % (vv["percent"], int(vv["total"] / 1024 / 1024))
                     items.append(dict(name=item, v=st, alertFlag=vv["percent"] > 90))
                 elif item == "disk":
-                    st = "%dG/%dG" % (vv["used"] / 1024 / 1024 / 1024, vv["total"] / 1024 / 1024 / 1024)
-                    items.append(dict(name=item, v=st, alertFlag=vv["free"] < 1024 * 1024 * 1024 * 5))
+                    st = "%dG/%dG" % (
+                        vv["used"] / 1024 / 1024 / 1024,
+                        vv["total"] / 1024 / 1024 / 1024,
+                    )
+                    items.append(
+                        dict(
+                            name=item,
+                            v=st,
+                            alertFlag=vv["free"] < 1024 * 1024 * 1024 * 5,
+                        )
+                    )
                 else:
                     print("unknown item[%s]" % item)
 
@@ -140,14 +155,25 @@ class Server:
                     name = item["name"]
                     vv = self.status["disks"][name]
 
-                    st = "%dG/%dG" % (vv["used"] / 1024 / 1024 / 1024, vv["total"] / 1024 / 1024 / 1024)
-                    items.append(dict(name=name, v=st, alertFlag=vv["free"] < 1024 * 1024 * 1024 * 5))
+                    st = "%dG/%dG" % (
+                        vv["used"] / 1024 / 1024 / 1024,
+                        vv["total"] / 1024 / 1024 / 1024,
+                    )
+                    items.append(
+                        dict(
+                            name=name,
+                            v=st,
+                            alertFlag=vv["free"] < 1024 * 1024 * 1024 * 5,
+                        )
+                    )
                 elif tt == "mdadm":
                     name = item["name"]
                     vv = self.status["mdadms"][name]
 
                     st = "%d/%d" % (vv["act"], vv["tot"])
-                    items.append(dict(name=name, v=st, alertFlag=vv["act"] != vv["tot"]))
+                    items.append(
+                        dict(name=name, v=st, alertFlag=vv["act"] != vv["tot"])
+                    )
 
                 elif tt == "app":
                     name = item["name"]
@@ -159,7 +185,9 @@ class Server:
                     if ts is not None:
                         now = time.time()
                         gap = now - ts
-                        lst.append(dict(name="ts", v=tsGap2str(gap), alertFlag=gap > 60))
+                        lst.append(
+                            dict(name="ts", v=tsGap2str(gap), alertFlag=gap > 60)
+                        )
 
                     for key in vv:
                         item = vv[key]
@@ -168,12 +196,22 @@ class Server:
                         elif key == "arr":
                             for node in item:
                                 alertFlag = node.get("alertFlag", False)
-                                lst.append(dict(name=node["n"], v=str(node["v"]), alertFlag=alertFlag))
+                                lst.append(
+                                    dict(
+                                        name=node["n"],
+                                        v=str(node["v"]),
+                                        alertFlag=alertFlag,
+                                    )
+                                )
                         else:
                             if type(item) is dict:
                                 # alertFlag = item["alertFlag"] if "alertFlag" in item else False
                                 alertFlag = item.get("alertFlag", False)
-                                lst.append(dict(name=key, v=str(item["v"]), alertFlag=alertFlag))
+                                lst.append(
+                                    dict(
+                                        name=key, v=str(item["v"]), alertFlag=alertFlag
+                                    )
+                                )
                             else:
                                 # old style
                                 lst.append(dict(name=key, v=str(item), alertFlag=False))
@@ -295,7 +333,9 @@ class Http:
             results.append(ser.getStatus())
 
         # return web.Response(text=json.dumps(result))
-        return web.json_response({"name": g_cfg["name"], "servers": results})
+        return web.json_response(
+            {"name": g_cfg["name"], "fixedFont": g_cfg["fixedFont"], "servers": results}
+        )
 
     async def httpCmd(self, req):
         peername = req.transport.get_extra_info("peername")
@@ -317,7 +357,9 @@ class Http:
         elif host.startswith("192.168."):  #
             allowUse = True
         if not allowUse:
-            return web.Response(status=500, text="You can't use this API from %s" % host)
+            return web.Response(
+                status=500, text="You can't use this API from %s" % host
+            )
 
         ss = await req.read()  # json
         ss = ss.decode()
@@ -368,7 +410,9 @@ async def checkLoop():
     await asyncio.sleep(20)
 
     email = Email()
-    email.init("smtp.gmail.com", 587, g_cfg["notification"]["id"], g_cfg["notification"]["pw"])
+    email.init(
+        "smtp.gmail.com", 587, g_cfg["notification"]["id"], g_cfg["notification"]["pw"]
+    )
 
     errChanged = False
     errList = []  # {name, exist}
@@ -400,7 +444,10 @@ async def checkLoop():
 
             for item in ser["items"]:
                 if item.get("alertFlag", False):
-                    notiCtx += '<font color="red">%s(%s),</font>&nbsp;' % (item["name"], item["v"])
+                    notiCtx += '<font color="red">%s(%s),</font>&nbsp;' % (
+                        item["name"],
+                        item["v"],
+                    )
                     name = "%s/%s" % (ser["name"], item["name"])
                     if _errNew(name):
                         print("new err - %s" % name)
@@ -412,7 +459,10 @@ async def checkLoop():
 
                 for item in group["items"]:
                     if item.get("alertFlag", False):
-                        notiCtx += '<font color="red">%s(%s),</font>&nbsp;' % (item["name"], item["v"])
+                        notiCtx += '<font color="red">%s(%s),</font>&nbsp;' % (
+                            item["name"],
+                            item["v"],
+                        )
                         name = "%s/%s/%s" % (ser["name"], group["name"], item["name"])
                         if _errNew(name):
                             print("new err - %s" % (name))
@@ -435,7 +485,12 @@ async def checkLoop():
             # removed - errList / exit false
             # new - item.new True
             ##ss = yaml.safe_dump(result)
-            email.sendHtml("sermon@sermon.com", g_cfg["notification"]["emails"], notiSubject, notiCtx)
+            email.sendHtml(
+                "sermon@sermon.com",
+                g_cfg["notification"]["emails"],
+                notiSubject,
+                notiCtx,
+            )
 
         await asyncio.sleep(5)
 
@@ -477,7 +532,9 @@ def loadConfig():
 def main():
     global g_cfg
     g_cfg = loadConfig()
-    ss = "\n".join(list(map(lambda line: "  " + line, yaml.safe_dump(g_cfg).split("\n"))))
+    ss = "\n".join(
+        list(map(lambda line: "  " + line, yaml.safe_dump(g_cfg).split("\n")))
+    )
     print("cfg -\n%s" % ss)
 
     loop = asyncio.get_event_loop()
