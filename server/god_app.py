@@ -104,7 +104,9 @@ class myGod:
                 varsOvr=dict(startDaemon=False, sepDk=True),
             )
 
-            env.copyFile(f"config/base-{remote.server.name}.yml", "/app/current/config/my.yml")
+            env.copyFile(
+                f"config/base-{remote.server.name}.yml", "/app/current/config/my.yml"
+            )
 
         # 이미지는 모두 동일하고, 환경은 실행할때 변수로 주자
         my.dockerUpdateImage(
@@ -129,7 +131,9 @@ class myGod:
             dk = remote.dockerConn(remote.vars.dkName)
 
             # 갱신될을수 있으니 매번
-            dk.copyFile(f"config/base-{remote.server.name}.yml", "/app/current/config/my.yml")
+            dk.copyFile(
+                f"config/base-{remote.server.name}.yml", "/app/current/config/my.yml"
+            )
 
             # with open(f"config/my.yml", "r") as fp:
             # env = yaml.safe_load(fp.read())
@@ -138,14 +142,16 @@ class myGod:
 
             # register ssh key of sermon - 이거 키 보존해야한다 매번 바뀌면 안됨
             # pub = remote.runOutput(f"sudo cat /home/{remote.server.owner}/.ssh/id_rsa.pub")
-            pub = dk.runOutput(f"sudo cat /root/.ssh/id_rsa.pub")
+            pub = dk.runOutput(f"sudo cat /root/.ssh/id_ed25519.pub")
             for server in cfg["servers"]:
                 arr = server["url"].split(":")
                 host = arr[0]
                 port = int(arr[1]) if len(arr) >= 2 else 22
                 dkName = server.get("dkName", None)
                 dkId = server.get("dkId", None)
-                ser = dk.remoteConn(host=host, port=port, id=server["id"], dkName=dkName, dkId=dkId)
+                ser = dk.remoteConn(
+                    host=host, port=port, id=server["id"], dkName=dkName, dkId=dkId
+                )
                 my.registerAuthPub(ser, id=server["id"], pub=pub)
 
             my.writeRunScript(
@@ -171,12 +177,12 @@ exec python3 -u sermon.py
                 privateFilter="""\
 allow 172.0.0.0/8; # docker""",
                 # certSetup=remote.server.name != "rtw",
-                certSetup=remote.server.name == 'mmx',  # eg는 http로 쓴다
+                certSetup=remote.server.name == "mmx",  # eg는 http로 쓴다
                 localBind=True,
             )
 
             # 이제 n2가 메인이다 - 이제 setupWebApp에서 certSetup직접 함
-            if remote.server.name == 'mmx' and False:
+            if remote.server.name == "mmx" and False:
                 d21 = remote.remoteConn("rt.mmx.kr", port=20422, id="root")
 
                 # 인증서만 얻어올까? - 어차피 블럭을 추가해버리기 때문에 설정은 있어야한다
@@ -203,8 +209,7 @@ allow 172.0.0.0/8; # docker""",
                 # 일단 d21 proxy, direct 둘다 지원한다
                 # cron으로 주기적으로 가져와야한다
                 # ssh root@192.168.1.204
-                my.certbotCopy(d21, web, domain=remote.vars.domain, cfgName='sermon')
-        
+                my.certbotCopy(d21, web, domain=remote.vars.domain, cfgName="sermon")
 
     def deployPreTask(self, util, remote, local, **_):
         # create new user with ssh key
@@ -216,12 +221,14 @@ allow 172.0.0.0/8; # docker""",
         if remote.vars.sepDk:
             my.makeUser(remote, id="sermon", genSshKey=False)
             my.makeUser(remote, id="cjng96", genSshKey=False)
-            my.sshKeyGen(remote, id="root")
+            # my.sshKeyGen(remote, id="root")
+            remote.copyFile(f"./key/id_ed25519", "~/.ssh/id_ed25519")
+            remote.copyFile(f"./key/id_ed25519.pub", "~/.ssh/id_ed25519.pub")
 
         else:
             # 현재 user만들고 sv조작때문에 sudo가 필요하다
             pubs = list(map(lambda x: x["key"], self.data.sshPub))
-            pubs.append(local.strLoad("~/.ssh/id_rsa.pub"))
+            pubs.append(local.strLoad("~/.ssh/id_ed25519.pub"))
             my.makeUser(remote, id=remote.server.owner, authPubs=pubs)
             remote.run(f"sudo adduser {remote.server.id} {remote.server.owner}")
 
@@ -230,7 +237,9 @@ allow 172.0.0.0/8; # docker""",
         # my.nginxWebSite(remote, name='sermon', domain=remote.vars.domain, certAdminEmail='cjng96@gmail.com', root='%s/current' % remote.server.deployRoot, cacheOn=True)
 
         remote.run("sudo apt install --no-install-recommends -y libffi-dev")
-        remote.run(f"cd {remote.server.deployPath} && sudo -H pip3 install -r requirements.txt")
+        remote.run(
+            f"cd {remote.server.deployPath} && sudo -H pip3 install -r requirements.txt"
+        )
 
         # TODO: my.yml notification.pw를 생성해주자
 
@@ -257,4 +266,6 @@ stderr_logfile_backups=2
                 f"/etc/supervisor/conf.d/{remote.server.owner}.conf",
                 sudo=True,
             )
-            remote.run(f"sudo supervisorctl update && sudo supervisorctl restart {remote.server.owner}")
+            remote.run(
+                f"sudo supervisorctl update && sudo supervisorctl restart {remote.server.owner}"
+            )
