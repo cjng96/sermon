@@ -35,28 +35,19 @@ servers:
       - { type: app, name: collPlus, status: /work/collplus/collPlus.st }
       - { type: app, name: collAdmin, status: /work/collAdmin/collAdmin.st }
 
-  - name: m1
-    url: nas.mmx.kr:13622
-    id: cjng96
-    monitor:
-      # - cpu
-      - load
-      - mem
-      - swap
-      - disk
-      - { type: app, name: engT, status: /work/engt/engt.st, saName: engt }
-      - { type: app, name: engFileT, status: /work/efilet/engFileT.st }
-      - { type: app, name: inerAuthT, status: /work/iautht/inerAuthT.st }
-      - { type: app, name: inerUpdateT, status: /work/iupdatet/inerUpdateT.st }
-      - { type: app, name: inerLogT, status: /work/ilogt/inerLogT.st }
-      - { type: app, name: collT, status: /work/collt/collT.st }
-      - { type: app, name: collPlusT, status: /work/collplust/collPlusT.st }
+  # - name: m1
+  #   url: nas.mmx.kr:13622
+  #   id: cjng96
+  #   monitor:
+  #     - load
+  #     - mem
+  #     - swap
+  #     - disk
 
   - name: n2
     url: nas.mmx.kr:13522
     id: cjng96
     monitor:
-      # - cpu
       - load
       - mem
       - swap
@@ -66,3 +57,10 @@ servers:
       - { type: disk, name: w, path: /mnt/data }
       # - { type: disk, name: md0, path: /media/md0 }
       # - { type: disk, name: bk, path: /media/bk }
+      - { type: app, name: engT, status: /work/engt/engt.st, saName: engt }
+      - { type: app, name: engFileT, status: /work/efilet/engFileT.st }
+      - { type: app, name: inerAuthT, status: /work/iautht/inerAuthT.st }
+      - { type: app, name: inerUpdateT, status: /work/iupdatet/inerUpdateT.st }
+      - { type: app, name: inerLogT, status: /work/ilogt/inerLogT.st }
+      - { type: app, name: collT, status: /work/collt/collT.st }
+      - { type: app, name: collPlusT, status: /work/collplust/collPlusT.st }
