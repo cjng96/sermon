@@ -162,6 +162,8 @@ exec python3 -u sermon.py
 """,
             )
 
+            usingProxy = False
+
             proxyUrl = f"http://{remote.vars.dkName}:{cfg['port']}"
             web = remote.dockerConn(remote.vars.webDocker)  # , dkId=remote.server.dkId)
             my.setupWebApp(
@@ -178,11 +180,11 @@ exec python3 -u sermon.py
 allow 172.0.0.0/8; # docker""",
                 # certSetup=remote.server.name != "rtw",
                 certSetup=remote.server.name == "mmx",  # eg는 http로 쓴다
-                localBind=True,
+                localBind=usingProxy,
             )
 
             # 이제 n2가 메인이다 - 이제 setupWebApp에서 certSetup직접 함
-            if remote.server.name == "mmx" and False:
+            if remote.server.name == "mmx" and usingProxy:
                 d21 = remote.remoteConn("rt.mmx.kr", port=20422, id="root")
 
                 # 인증서만 얻어올까? - 어차피 블럭을 추가해버리기 때문에 설정은 있어야한다
