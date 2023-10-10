@@ -150,7 +150,12 @@ class myGod:
                 dkName = server.get("dkName", None)
                 dkId = server.get("dkId", None)
                 ser = dk.remoteConn(
-                    host=host, port=port, id=server["id"], dkName=dkName, dkId=dkId
+                    host=host,
+                    port=port,
+                    id=server["id"],
+                    dkName=dkName,
+                    dkId=dkId,
+                    keyFile=server.get("key"),
                 )
                 my.registerAuthPub(ser, id=server["id"], pub=pub)
 

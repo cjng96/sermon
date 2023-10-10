@@ -20,6 +20,17 @@ notification:
   emails:
     - cjng96@gmail.com
 
+servers1:
+  - name: motionFilter
+    url: 52.9.57.155
+    id: centos
+    monitor:
+      - load
+      - mem
+      - swap
+      - disk
+      - { type: disk, name: ftp, path: /var/ftp }
+
 servers:
   - name: tool
     url: sermon.retailtrend.net:443
@@ -69,7 +80,8 @@ servers:
 
   - name: motionFilter
     url: 52.9.57.155
-    id: cjng96
+    id: centos
+    key: key/id_ed25519
     monitor:
       - load
       - mem
