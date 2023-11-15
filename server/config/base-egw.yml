@@ -89,6 +89,7 @@ servers:
       - swap
       - disk
       - { type: disk, name: ftp, path: /var/ftp }
+      - { type: app, name: motionFilter, status: /tmp/motion_filter.st }
 
   - name: secure
     url: secure.retailtrend.net
