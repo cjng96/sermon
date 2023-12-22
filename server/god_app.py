@@ -71,15 +71,16 @@ v말고 alertFlag=true가 있으면 오류로 처리
 import os
 import sys
 
-provisionPath = os.path.expanduser("~/iner/provision/")
-sys.path.insert(0, provisionPath)
-import myutil as my
+# provisionPath = os.path.expanduser("~/iner/provision/")
+# sys.path.insert(0, provisionPath)
+
+import godtool.plugin as my
 
 
 class myGod:
     def __init__(self, helper, **_):
         helper.configStr("yaml", config)
-        self.data = helper.loadData(os.path.join(provisionPath, ".data.yml"))
+        # self.data = helper.loadData(os.path.join(provisionPath, ".data.yml"))
 
     # return: False(stop post processes)
     def buildTask(self, util, local, **kwargs):
