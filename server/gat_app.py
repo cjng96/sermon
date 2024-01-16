@@ -74,10 +74,10 @@ import sys
 # provisionPath = os.path.expanduser("~/iner/provision/")
 # sys.path.insert(0, provisionPath)
 
-import godtool.plugin as my
+import gat.plugin as my
 
 
-class myGod:
+class myGat:
     def __init__(self, helper, **_):
         helper.configStr("yaml", config)
         # self.data = helper.loadData(os.path.join(provisionPath, ".data.yml"))
@@ -99,7 +99,7 @@ class myGod:
             env.run("cd /etc/service && rm -rf sshd cron")
 
             env.deployApp(
-                "./god_app",
+                "./gat_app",
                 profile=remote.server.name,
                 serverOvr=dict(dkName=dkImg + "-con"),
                 varsOvr=dict(startDaemon=False, sepDk=True),
