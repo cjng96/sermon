@@ -18,8 +18,8 @@ deploy:
     - "*"
   exclude:
     - __pycache__
-    - config/my.yml
-    - "config/base-*.yml"
+    - config
+    - .vscode
 
   sharedLinks: []
 
@@ -27,32 +27,17 @@ defaultVars:
   dkName: sermon
 
 servers:
-  - name: mmx
-    host: nas.mmx.kr
-    port: 13522
-    id: cjng96
+  - name: sample
+    host: sample.com
+    port: 22
+    id: admin
     # dkName: ser
     # dkId: cjng96
     owner: sermon
     # deployRoot: /home/{{server.owner}}
     deployRoot: /app
     vars:
-      domain: sermon.mmx.kr
-      webDocker: web
-      root: /data/sermon
-
-  - name: egw
-    host1: watchmon.ucount.it
-    host: sermon.retailtrend.net
-    port: 443
-    id: ubuntu
-    # dkName: ser
-    # dkId: cjng96
-    # owner: sermon
-    # deployRoot: /home/{{server.owner}}
-    deployRoot: /app
-    vars:
-      domain: sermon.retailtrend.net
+      domain: sermon.sample.com
       webDocker: web
       root: /data/sermon
 
@@ -75,15 +60,17 @@ import sys
 # sys.path.insert(0, provisionPath)
 
 import gat.plugin as my
+import gat.myutil as gutil
 
 
 class myGat:
     def __init__(self, helper, **_):
         helper.configStr("yaml", config)
+
         # self.data = helper.loadData(os.path.join(provisionPath, ".data.yml"))
 
     # return: False(stop post processes)
-    def buildTask(self, util, local, **kwargs):
+    def buildTask(self, util, local, **_):
         # local.gqlGen()
         # local.goBuild()
         pass
@@ -99,7 +86,8 @@ class myGat:
             env.run("cd /etc/service && rm -rf sshd cron")
 
             env.deployApp(
-                "./gat_app",
+                # f"{remote.config.srcPath}/gat_app",
+                self.rootGatPath,
                 profile=remote.server.name,
                 serverOvr=dict(dkName=dkImg + "-con"),
                 varsOvr=dict(startDaemon=False, sepDk=True),
@@ -133,7 +121,7 @@ class myGat:
 
             # 갱신될을수 있으니 매번
             dk.copyFile(
-                f"config/base-{remote.server.name}.yml", "/app/current/config/my.yml"
+                f"config/cfg-{remote.server.name}.yml", "/app/current/config/my.yml"
             )
 
             # with open(f"config/my.yml", "r") as fp:
@@ -230,8 +218,8 @@ allow 172.0.0.0/8; # docker""",
             my.makeUser(remote, id="sermon", genSshKey=False)
             my.makeUser(remote, id="cjng96", genSshKey=False)
             # my.sshKeyGen(remote, id="root")
-            remote.copyFile(f"./key/id_ed25519", "~/.ssh/id_ed25519")
-            remote.copyFile(f"./key/id_ed25519.pub", "~/.ssh/id_ed25519.pub")
+            remote.copyFile(f"./config/id_ed25519", "~/.ssh/id_ed25519")
+            remote.copyFile(f"./config/id_ed25519.pub", "~/.ssh/id_ed25519.pub")
 
         else:
             # 현재 user만들고 sv조작때문에 sudo가 필요하다
