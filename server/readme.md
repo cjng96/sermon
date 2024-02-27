@@ -18,9 +18,9 @@ servers:
   - name: myname
     host: myhost.com
     port: 13522
-    id: cjng96
+    id: admin
     # dkName: ser
-    # dkId: cjng96
+    # dkId: admin
     owner: sermon
     # deployRoot: /home/{{server.owner}}
     deployRoot: /app

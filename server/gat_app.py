@@ -32,7 +32,7 @@ servers:
     port: 22
     id: admin
     # dkName: ser
-    # dkId: cjng96
+    # dkId: admin
     owner: sermon
     # deployRoot: /home/{{server.owner}}
     deployRoot: /app

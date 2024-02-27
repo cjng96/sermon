@@ -3,15 +3,15 @@ domain: domain.com
 
 notification:
   type: gmail
-  id: cjng96@gmail.com
+  id: sermon@test.com
   pw:
   emails:
-    - cjng96@gmail.com
+    - sermon@test.com
 
 servers:
   - name: local
     url: localhost
-    id: cjng96
+    id: admin
     monitor:
       - cpu
       - load

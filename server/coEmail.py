@@ -1,6 +1,8 @@
 import os
 import smtplib
-from email import encoders  # 파일전송을 할 때 이미지나 문서 동영상 등의 파일을 문자열로 변환할 때 사용할 패키지
+from email import (
+    encoders,
+)  # 파일전송을 할 때 이미지나 문서 동영상 등의 파일을 문자열로 변환할 때 사용할 패키지
 from email.mime.text import MIMEText  # 본문내용을 전송할 때 사용되는 모듈
 from email.mime.multipart import MIMEMultipart  # 메시지를 보낼 때 메시지에 대한 모듈
 from email.mime.base import MIMEBase  # 파일을 전송할 때 사용되는 모듈
@@ -58,8 +60,8 @@ class SenderSendmail:
 			emailFrom = self.emailFrom
 
 		msg = MIMEText(content) # "EasyCollector new user\nphone:%s\nemail:%s" % (phone, email))
-		msg["From"] = emailFrom	# "cjng96@gmail.com"
-		msg["To"] = emailTo # "bluekara@nate.com, cjng96@gmail.com, felerdin@gmail.com"
+		msg["From"] = emailFrom	# "test@gmail.com"
+		msg["To"] = emailTo # "test@gmail.com, test2@gmail.com"
 		msg["Subject"] = subject # "[EC%s] new user[%s]" % ("test" if g.isTestMode else "", phone)
 		p = Popen(["/usr/sbin/sendmail", "-t", "-oi"], stdin=PIPE)
 		p.communicate(msg.as_string().encode())
