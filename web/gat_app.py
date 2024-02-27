@@ -20,27 +20,16 @@ deploy:
       dest: .
 
 servers:
-  - name: mmx
-    host: nas.mmx.kr
+  - name: sample
+    host: sample.com
     port: 13522
-    id: cjng96
+    id: admin
     dkName: web
-    # dkId: cjng96
     #owner: websert
     deployRoot: /data/sermon
     vars:
       serverUrl: https://sermon.mmx.kr:33/cmd
 
-  - name: egw
-    host: sermon.retailtrend.net
-    port: 443
-    id: ubuntu
-    dkName: web
-    # dkId: cjng96
-    #owner: websert
-    deployRoot: /data/sermon
-    vars:
-      serverUrl: http://sermon.retailtrend.net/cmd
 """
 
 import os, sys
@@ -78,7 +67,6 @@ class myGat:
             # remote.run('sudo touch {0} && sudo chmod 700 {0}'.format('/home/{{server.owner}}/.ssh/authorized_keys'))
             # remote.strEnsure("/home/{{server.owner}}/.ssh/authorized_keys", local.strLoad("~/.ssh/id_rsa.pub"), sudo=True)
 
-            # remote.run("sudo mkdir -p {0} && sudo chown cjng96: {0}".format(remote.server.deployRoot))
             remote.run(f"sudo mkdir -p {remote.server.deployRoot}")
 
             pp = "./build/web/index.html"
@@ -96,6 +84,5 @@ class myGat:
             os.chdir(old)
 
     def deployPostTask(self, util, remote, local, **_):
-
-        # my.nginxWebSite(remote, name='sermon', domain=remote.vars.domain, certAdminEmail='cjng96@gmail.com', root='%s/current' % remote.server.deployRoot, cacheOn=True)
+        # my.nginxWebSite(remote, name='sermon', domain=remote.vars.domain, certAdminEmail='admin@gmail.com', root='%s/current' % remote.server.deployRoot, cacheOn=True)
         pass

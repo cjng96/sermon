@@ -165,7 +165,7 @@ exec python3 -u sermon.py
                 # name=remote.server.owner,
                 name=remote.config.name,
                 domain=remote.vars.domain,
-                certAdminEmail="cjng96@gmail.com",
+                certAdminEmail=remote.vars.certAdminEmail,
                 root=f"{remote.vars.root}/current",
                 publicApi="/cmd",
                 proxyUrl=proxyUrl,
@@ -186,7 +186,7 @@ allow 172.0.0.0/8; # docker""",
                     d21,
                     name="sermon",
                     domain=remote.vars.domain,
-                    certAdminEmail="cjng96@gmail.com",
+                    certAdminEmail=remote.vars.certAdminEmail,
                     proxyUrl="http://192.168.111.135",
                     nginxCfgPath="/etc/nginx/sites-enabled",
                     buffering=False,
@@ -196,7 +196,7 @@ allow 172.0.0.0/8; # docker""",
                 # certbotSetup(
                 #     d21,
                 #     domainStr=remote.vars.domain,
-                #     email='cjng96@gmail.com',
+                #     email='admin@gmail.com',
                 #     name='sermon',
                 #     httpRedirect=False,
                 #     nginxCfgPath='/etc/nginx/sites-enabled',
@@ -230,7 +230,7 @@ allow 172.0.0.0/8; # docker""",
 
     def deployPostTask(self, util, remote, local, **_):
         # web과 server를 지원하는 nginx 설정
-        # my.nginxWebSite(remote, name='sermon', domain=remote.vars.domain, certAdminEmail='cjng96@gmail.com', root='%s/current' % remote.server.deployRoot, cacheOn=True)
+        # my.nginxWebSite(remote, name='sermon', domain=remote.vars.domain, certAdminEmail='admin@gmail.com', root='%s/current' % remote.server.deployRoot, cacheOn=True)
 
         remote.run("sudo apt install --no-install-recommends -y libffi-dev")
         remote.run(
