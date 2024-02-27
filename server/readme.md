@@ -1,8 +1,8 @@
 ## Instruction
 
 - `git init sermon; cd sermon`
-- `cp -rf sermon/server/config .`
 - `git submodule add git@github.com:cjng96/sermon.git && git submodule update --init`
+- `cp -rf sermon/server/config .`
 - `ssh-keygen -t ed25519 -f config/id_ed25519 -N ''`
 - create ser_app.py file as follows,
 
@@ -15,8 +15,8 @@ import gat.plugin as my
 ovrConfig = """
 srcPath: sermon/server
 servers:
-  - name: sample
-    host: sample.com
+  - name: myname
+    host: myhost.com
     port: 13522
     id: cjng96
     # dkName: ser
@@ -38,6 +38,6 @@ class myGat(app.myGat):
         self.rootGatPath = os.path.abspath(__file__)
 ```
 
-- write config/cfg-sample.yml file refer to config/cfg-sample.refer.yml
+- write config/cfg-myname.yml file refer to config/cfg-sample.refer.yml
 
 - `gat ser_app ENV_NAME run`
