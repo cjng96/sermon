@@ -15,8 +15,8 @@ import gat.plugin as my
 ovrConfig = """
 srcPath: sermon/server
 servers:
-  - name: mmx
-    host: nas.mmx.kr
+  - name: sample
+    host: sample.com
     port: 13522
     id: cjng96
     # dkName: ser
@@ -29,22 +29,6 @@ servers:
       webDocker: web
       root: /data/sermon
 
-
-  - name: egw
-    host1: watchmon.ucount.it
-    host: sermon.retailtrend.net
-    port: 443
-    id: ubuntu
-    # dkName: ser
-    # dkId: cjng96
-    # owner: sermon
-    # deployRoot: /home/{{server.owner}}
-    deployRoot: /app
-    vars:
-      domain: sermon.retailtrend.net
-      webDocker: web
-      root: /data/sermon
-
 """
 
 class myGat(app.myGat):
@@ -53,5 +37,7 @@ class myGat(app.myGat):
         helper.configStr("yaml", ovrConfig)
         self.rootGatPath = os.path.abspath(__file__)
 ```
+
+- write config/cfg-sample.yml file refer to config/cfg-sample.refer.yml
 
 - `gat ser_app ENV_NAME run`

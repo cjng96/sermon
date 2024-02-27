@@ -80,7 +80,7 @@ class myGat:
 
         dkImg = "sermon"
         dkVer, hash = my.deployCheckVersion(remote, util, dkImg, f"{baseVer}.")
-        # base-mmx.yml이 갱신되도 다시 업데이트 해야하나
+        # cfg-env.yml이 갱신되도 다시 업데이트 해야하나
 
         def update(env):
             env.run("cd /etc/service && rm -rf sshd cron")
@@ -94,7 +94,7 @@ class myGat:
             )
 
             env.copyFile(
-                f"config/base-{remote.server.name}.yml", "/app/current/config/my.yml"
+                f"config/cfg-{remote.server.name}.yml", "/app/current/config/my.yml"
             )
 
         # 이미지는 모두 동일하고, 환경은 실행할때 변수로 주자
