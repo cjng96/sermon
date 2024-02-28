@@ -40,9 +40,9 @@ class StItem {
   StItem(this.name, this.alertFlag, this.type, this.v);
   factory StItem.fromJson(Map<String, dynamic> json) => StItem(
         json['name'] as String,
-        json['alertFlag'] as bool,
+        json['alertFlag'] as bool? ?? false,
         json['type'] as String? ?? '',
-        json['v'] as String,
+        json['v'] as String? ?? '', // name:newline, type:sp의 경우 v가 없다
       );
   Map<String, dynamic> toJson() => <String, dynamic>{
         'name': name,
@@ -140,9 +140,12 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
 
     // var url = 'http://localhost:25090/cmd';
     // if (kReleaseMode) {
-    const url = kReleaseMode
+
+    const urlEnv = kReleaseMode
         ? String.fromEnvironment('SERVER_URL', defaultValue: 'http://localhost:25090/cmd')
         : 'http://sermon.retailtrend.net/cmd';
+    var url = urlEnv;
+    //url = 'https://sermon.mmx.kr:33/cmd';
 
     print('url - $url');
     final res = await http.post(Uri.parse(url), body: ss).timeout(const Duration(seconds: 30));
