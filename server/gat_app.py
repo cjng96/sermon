@@ -18,7 +18,7 @@ deploy:
     - "*"
   exclude:
     - __pycache__
-    - config
+    # - config
     - .vscode
 
   sharedLinks: []
@@ -94,7 +94,9 @@ class myGat:
             )
 
             env.copyFile(
-                f"config/cfg-{remote.server.name}.yml", "/app/current/config/my.yml"
+                f"config/cfg-{remote.server.name}.yml",
+                "/app/current/config/my.yml",
+                # makeFolder=True,
             )
 
         # 이미지는 모두 동일하고, 환경은 실행할때 변수로 주자
@@ -214,19 +216,11 @@ allow 172.0.0.0/8; # docker""",
         # remote.run('sudo touch {0} && sudo chmod 700 {0}'.format('/home/{{server.owner}}/.ssh/authorized_keys'))
         # remote.strEnsure("/home/{{server.owner}}/.ssh/authorized_keys", local.strLoad("~/.ssh/id_rsa.pub"), sudo=True)
 
-        if remote.vars.sepDk:
-            # my.makeUser(remote, id="sermon", genSshKey=False)
-
-            # my.sshKeyGen(remote, id="root")
-            remote.copyFile(f"./config/id_ed25519", "~/.ssh/id_ed25519")
-            remote.copyFile(f"./config/id_ed25519.pub", "~/.ssh/id_ed25519.pub")
-
-        else:
-            # 현재 user만들고 sv조작때문에 sudo가 필요하다
-            pubs = list(map(lambda x: x["key"], self.data.sshPub))
-            pubs.append(local.strLoad("~/.ssh/id_ed25519.pub"))
-            my.makeUser(remote, id=remote.server.owner, authPubs=pubs)
-            remote.run(f"sudo adduser {remote.server.id} {remote.server.owner}")
+        # 현재 user만들고 sv조작때문에 sudo가 필요하다
+        pubs = list(map(lambda x: x["key"], self.data.sshPub))
+        pubs.append(local.strLoad("~/.ssh/id_ed25519.pub"))
+        my.makeUser(remote, id=remote.server.owner, authPubs=pubs)
+        remote.run(f"sudo adduser {remote.server.id} {remote.server.owner}")
 
     def deployPostTask(self, util, remote, local, **_):
         # web과 server를 지원하는 nginx 설정
@@ -238,30 +232,3 @@ allow 172.0.0.0/8; # docker""",
         )
 
         # TODO: my.yml notification.pw를 생성해주자
-
-        if not remote.vars.sepDk:
-            # register supervisor
-            remote.makeFile(
-                """\
-[program:{{server.owner}}]
-user={{server.owner}}
-directory={{deployRoot}}/current/
-command=python3 -u sermon.py
-autostart=true
-autorestart=true
-stopasgroup=true
-environment=HOME="/home/%(program_name)s",LANG="en_US.UTF-8",LC_ALL="en_US.UTF-8"
-
-stderr_logfile=/var/log/supervisor/%(program_name)s_err.log
-stdout_logfile=/var/log/supervisor/%(program_name)s_out.log
-stdout_logfile_maxbytes=150MB
-stderr_logfile_maxbytes=50MB
-stdout_logfile_backups=2
-stderr_logfile_backups=2
-""",
-                f"/etc/supervisor/conf.d/{remote.server.owner}.conf",
-                sudo=True,
-            )
-            remote.run(
-                f"sudo supervisorctl update && sudo supervisorctl restart {remote.server.owner}"
-            )
