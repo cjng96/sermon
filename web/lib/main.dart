@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 import 'platformOther.dart' if (kIsWeb) 'platformWeb.dart';
 
@@ -197,7 +198,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
           final serverItems = <Widget>[];
           serverItems.add(Text('${ser.name}',
               style: TextStyle(
-                color: Colors.blue,
+                color: Colors.black54,
                 fontFeatures: [FontFeature.tabularFigures()],
               )));
           serverItems.add(Text(' (${df.format(ss)})',
@@ -208,11 +209,13 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
               )));
 
           final rows = <Widget>[];
-          rows.insert(0, Row(children: serverItems));
+          Widget serverRow = Row(children: serverItems);
+          serverRow = ColoredBox(child: serverRow, color: Colors.blue.withAlpha(40));
+
+          rows.insert(0, serverRow);
 
           // 서버 자체 속성들 - rootRows로 rows앞쪽에 추가된다
           var rootItems = <Widget>[Text('  ')];
-          rows.add(Row(children: rootItems));
           for (final item in ser.items) {
             if (item.type == 'sp') {
               switch (item.name) {
@@ -222,19 +225,80 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                   break;
               }
             } else {
-              final txt = Text(
-                '${item.name}: ${item.v} ',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: item.alertFlag ? Colors.red : Colors.black,
-                  // fontFeatures: [FontFeature.tabularFigures()],
-                  // fontFeatures: [FontFeature.enable('lnum')],
-                ),
-                maxLines: 1000,
-              );
-              rootItems.add(txt);
+              Widget? w;
+              print('item name - ${item.name} - ${item.v}');
+              final sizeRE = RegExp(r'(\d+)G/(\d+)G');
+              switch (item.name) {
+                case 'mem':
+                case 'swap':
+                  // 54%(62792MB)
+                  final percentRE = RegExp(r'(\d+)%\((\d+.+)\)');
+                  final m = percentRE.firstMatch(item.v);
+                  if (m != null) {
+                    final percent = int.parse(m.group(1)!);
+                    final total = m.group(2);
+                    final cr = item.alertFlag ? Colors.red : Colors.blue.withAlpha(40);
+                    w = LinearPercentIndicator(
+                      width: 150.0,
+                      animation: true,
+                      animationDuration: 100,
+                      lineHeight: 20.0,
+                      leading: Text("${item.name}:"),
+                      // trailing: const Text("right"),
+                      percent: percent / 100,
+                      center: Text("$percent%($total)"),
+                      progressColor: cr,
+                      barRadius: Radius.circular(7),
+                    );
+                    // w = SizedBox(child: w, width: 200);
+                    // w = Row(children: [Text('${item.name}:'), w]);
+                    w = IntrinsicWidth(child: w);
+                  }
+                  break;
+                case 'disk':
+                default: // mongo, ftp...
+                  // 23G/29G
+                  final m = sizeRE.firstMatch(item.v);
+                  if (m != null) {
+                    final used = int.parse(m.group(1)!);
+                    final total = int.parse(m.group(2)!);
+                    final cr = item.alertFlag ? Colors.red : Colors.blue.withAlpha(40);
+                    w = LinearPercentIndicator(
+                      width: 150.0,
+                      animation: true,
+                      animationDuration: 100,
+                      lineHeight: 20.0,
+                      leading: Text("${item.name}:"),
+                      // trailing: const Text("right"),
+                      percent: used / total,
+                      center: Text("${used}G/${total}G"),
+                      progressColor: cr,
+                      barRadius: Radius.circular(7),
+                    );
+                    // w = ColoredBox(child: w, color: Colors.green);
+                    w = IntrinsicWidth(child: w);
+                  }
+                  break;
+              }
+
+              if (w == null) {
+                w = Text(
+                  '${item.name}: ${item.v} ',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    color: item.alertFlag ? Colors.red : Colors.black,
+                    // fontFeatures: [FontFeature.tabularFigures()],
+                    // fontFeatures: [FontFeature.enable('lnum')],
+                  ),
+                  maxLines: 1000,
+                );
+              }
+              rootItems.add(w);
             }
           }
+          // rows.add(Flex(children: rootItems, direction: Axis.horizontal));
+
+          rows.add(Wrap(children: rootItems));
 
           // 여기부터 하위
           for (final group in ser.groups) {
@@ -248,38 +312,40 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
             final lstRows = <Widget>[]; // 별도 행으로 표시할 아이템은 여기에
             print('item - ${group.items}');
             var cellCnt = 0;
-            if (group.items != null) {
-              for (final item in group.items) {
-                if (item.name == '__grid') {
-                  cellCnt = int.parse(item.v);
-                  lstRows.add(Wrap(children: items));
-                  items = <Widget>[pre];
-                  continue;
-                }
-                // print('name ${item.name} - ${item.v} - $cellCnt');
-                final txt = Text('${item.name}: ${item.v} ',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      color: item.alertFlag ? Colors.red : Colors.black,
-                      // fontFeatures: [FontFeature.tabularFigures()],
-                      // fontFeatures: [FontFeature.enable('lnum')],
-                    ));
-                if (cellCnt == 0) {
-                  items.add(txt);
-                } else {
-                  items.add(txt);
-                  if (items.length - 1 >= cellCnt) {
-                    for (var i = 1; i < items.length; ++i) {
-                      items[i] = Expanded(child: items[i]);
-                      // items[i] = items[i];
-                    }
-                    lstRows.add(Row(children: items));
-                    // lstRows.add(Wrap(children: items));
-                    items = <Widget>[pre];
+            // if (group.items != null) {
+            for (final item in group.items) {
+              if (item.name == '__grid') {
+                cellCnt = int.parse(item.v);
+                lstRows.add(Wrap(children: items));
+                items = <Widget>[pre];
+                continue;
+              }
+
+              // print('name ${item.name} - ${item.v} - $cellCnt');
+
+              final txt = Text('${item.name}: ${item.v} ',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    color: item.alertFlag ? Colors.red : Colors.black,
+                    // fontFeatures: [FontFeature.tabularFigures()],
+                    // fontFeatures: [FontFeature.enable('lnum')],
+                  ));
+              if (cellCnt == 0) {
+                items.add(txt);
+              } else {
+                items.add(txt);
+                if (items.length - 1 >= cellCnt) {
+                  for (var i = 1; i < items.length; ++i) {
+                    items[i] = Expanded(child: items[i]);
+                    // items[i] = items[i];
                   }
+                  lstRows.add(Row(children: items));
+                  // lstRows.add(Wrap(children: items));
+                  items = <Widget>[pre];
                 }
               }
             }
+            // }
 
             // if (lstRows.length > 0) {
             if (items.isNotEmpty) {
