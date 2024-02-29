@@ -93,12 +93,6 @@ class myGat:
                 varsOvr=dict(startDaemon=False, sepDk=True),
             )
 
-            env.copyFile(
-                f"config/cfg-{remote.server.name}.yml",
-                "/app/current/config/my.yml",
-                # makeFolder=True,
-            )
-
         # 이미지는 모두 동일하고, 환경은 실행할때 변수로 주자
         my.dockerUpdateImage(
             remote,
@@ -125,6 +119,10 @@ class myGat:
             dk.copyFile(
                 f"config/cfg-{remote.server.name}.yml", "/app/current/config/my.yml"
             )
+            dk.copyFile(f"config/id_ed25519", "/root/.ssh/id_ed25519", mode="600")
+            dk.copyFile(
+                f"config/id_ed25519.pub", "/root/.ssh/id_ed25519.pub", mode="600"
+            )
 
             # with open(f"config/my.yml", "r") as fp:
             # env = yaml.safe_load(fp.read())
@@ -133,7 +131,7 @@ class myGat:
 
             # register ssh key of sermon - 이거 키 보존해야한다 매번 바뀌면 안됨
             # pub = remote.runOutput(f"sudo cat /home/{remote.server.owner}/.ssh/id_rsa.pub")
-            pub = dk.runOutput(f"sudo cat /root/.ssh/id_ed25519.pub")
+            pub = dk.runOutput(f"cat /root/.ssh/id_ed25519.pub")
             for server in cfg["servers"]:
                 arr = server["url"].split(":")
                 host = arr[0]
@@ -217,10 +215,11 @@ allow 172.0.0.0/8; # docker""",
         # remote.strEnsure("/home/{{server.owner}}/.ssh/authorized_keys", local.strLoad("~/.ssh/id_rsa.pub"), sudo=True)
 
         # 현재 user만들고 sv조작때문에 sudo가 필요하다
-        pubs = list(map(lambda x: x["key"], self.data.sshPub))
-        pubs.append(local.strLoad("~/.ssh/id_ed25519.pub"))
-        my.makeUser(remote, id=remote.server.owner, authPubs=pubs)
-        remote.run(f"sudo adduser {remote.server.id} {remote.server.owner}")
+        # pubs = list(map(lambda x: x["key"], self.data.sshPub))
+        # pubs.append(local.strLoad("~/.ssh/id_ed25519.pub"))
+        # my.makeUser(remote, id=remote.server.owner, authPubs=pubs)
+        # remote.run(f"sudo adduser {remote.server.id} {remote.server.owner}")
+        pass
 
     def deployPostTask(self, util, remote, local, **_):
         # web과 server를 지원하는 nginx 설정
