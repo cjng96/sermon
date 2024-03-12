@@ -117,7 +117,7 @@ class myGat:
 
             # 갱신될을수 있으니 매번
             dk.copyFile(
-                f"config/cfg-{remote.server.name}.yml", "/app/current/config/my.yml"
+                f"config/{remote.server.name}.yml", "/app/current/config/my.yml"
             )
             dk.copyFile(f"config/id_ed25519", "/root/.ssh/id_ed25519", mode="600")
             dk.copyFile(
