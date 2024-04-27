@@ -83,9 +83,13 @@ class StServer {
     final items = json['items'] as List;
     final groups = json['groups'] as List;
 
+    if (!json.containsKey('ts')) {
+      print('ts not found - $json');
+    }
+
     return StServer(
       json['name'] as String,
-      json['ts'] as int,
+      json['ts'] as int? ?? 0,
       items.map((e) => StItem.fromJson(e as Map<String, dynamic>)).toList(),
       groups.map((e) => StGroup.fromJson(e as Map<String, dynamic>)).toList(),
     );
