@@ -79,12 +79,17 @@ class Server:
 
         # TODO: virtual env
         if self.dkName is None:
-            ssh.run("/usr/bin/pip3 install --break-system-packages wheel psutil")
+            try:
+                ssh.run("/usr/bin/pip3 install wheel psutil")
+            except Exception as e:
+                ssh.run("/usr/bin/pip3 install --break-system-packages wheel psutil")
+
         else:
-            ssh.run(
-                "sudo docker cp /tmp/sermon.py {0}:/tmp/sermon.py".format(self.dkName)
-            )
-            self.dkRun("/usr/bin/pip3 install --break-system-packages wheel psutil")
+            ssh.run(f"sudo docker cp /tmp/sermon.py {self.dkName}:/tmp/sermon.py")
+            try:
+                self.dkRun("/usr/bin/pip3 install wheel psutil")
+            except Exception as e:
+                self.dkRun("/usr/bin/pip3 install --break-system-packages wheel psutil")
 
         return True
 
