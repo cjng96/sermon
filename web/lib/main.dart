@@ -135,7 +135,7 @@ Color getErrColor(int alertLevel, bool progressBarFlag) {
   if (alertLevel >= 2) {
     return Colors.red;
   } else if (alertLevel == 1) {
-    return Color(0xFFFFAA00);
+    return Colors.orange;
   } else {
     return progressBarFlag ? Colors.blue.withAlpha(40) : Colors.black;
   }
@@ -165,7 +165,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
     const urlEnv = kReleaseMode
         ? String.fromEnvironment('SERVER_URL', defaultValue: 'http://localhost:25090/cmd')
         : 'http://sermon.retailtrend.net/cmd';
-    var url = urlEnv;
+    var url = 'http://localhost:25090/cmd';
     //url = 'https://sermon.mmx.kr:33/cmd';
 
     print('url - $url');
@@ -267,12 +267,12 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                       }
 
                       // alertFlag만 있는 경우
-                      else if (item.alertFlag && item.alertLevel == 0) {
+                      if (item.alertFlag && item.alertLevel == 0) {
                         cr = Colors.red;
                       }
 
                       // alertLevel만 있는 경우
-                      else if (!item.alertFlag && item.alertLevel > 0) {
+                      if (!item.alertFlag && item.alertLevel > 0) {
                         cr = getErrColor(item.alertLevel, true);
                       }
                     }
@@ -309,12 +309,12 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                       }
 
                       // alertFlag만 있는 경우
-                      else if (item.alertFlag && item.alertLevel == 0) {
+                      if (item.alertFlag && item.alertLevel == 0) {
                         cr = Colors.red;
                       }
 
                       // alertLevel만 있는 경우
-                      else if (!item.alertFlag && item.alertLevel > 0) {
+                      if (!item.alertFlag && item.alertLevel > 0) {
                         cr = getErrColor(item.alertLevel, true);
                       }
                     }
@@ -346,12 +346,12 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                   }
 
                   // alertFlag만 있는 경우
-                  else if (item.alertFlag && item.alertLevel == 0) {
+                  if (item.alertFlag && item.alertLevel == 0) {
                     cr = Colors.red;
                   }
 
                   // alertLevel만 있는 경우
-                  else if (!item.alertFlag && item.alertLevel > 0) {
+                  if (!item.alertFlag && item.alertLevel > 0) {
                     cr = getErrColor(item.alertLevel, false);
                   }
                 }
@@ -406,12 +406,12 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                 }
 
                 // alertFlag만 있는 경우
-                else if (item.alertFlag && item.alertLevel == 0) {
+                if (item.alertFlag && item.alertLevel == 0) {
                   cr = Colors.red;
                 }
 
                 // alertLevel만 있는 경우
-                else if (!item.alertFlag && item.alertLevel > 0) {
+                if (!item.alertFlag && item.alertLevel > 0) {
                   cr = getErrColor(item.alertLevel, false);
                 }
               }

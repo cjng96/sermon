@@ -49,7 +49,7 @@ def dictMerge(dic, dic2):
 
 # alertLevel에 따라 빨강, 밝은 주황, 검은색 return
 def getErrFontColor(alertLevel):
-    if alertLevel == 2:
+    if alertLevel >= 2:
         return 'red'
     elif alertLevel == 1:
         return '#FFAA00'

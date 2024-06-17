@@ -93,7 +93,7 @@ class Server:
 
         return True
 
-    # TODO: 주석 수정
+    # TODO: 주석 수정 [OK]
     def getStatus(self):
         """
         name: SERVER_NAME
@@ -101,6 +101,7 @@ class Server:
           - name: cpu
             v: 99%
             alertFlag: True
+            alertLevel: 2
 
         groups:
           - name: engt
@@ -108,9 +109,11 @@ class Server:
               - name: err
                 v: Error occurs
                 alertFlag: True
+                alertLevel: 1
               - name: ts
                 v: 00:21
                 alertFlag: False
+                alertLevel: 0
 
         """
         items = []
@@ -150,7 +153,7 @@ class Server:
                     if vv["percent"] > 95:
                         alertLevel = 2
                     elif vv["percent"] > 90:
-                        alertFlag =1
+                        alertLevel =1
 
                     items.append(dict(name=item, v=st, alertFlag=vv["percent"] > 90, alertLevel=alertLevel))
                 elif item == "swap":
@@ -268,7 +271,7 @@ class Server:
                                 # alertFlag = item["alertFlag"] if "alertFlag" in item else False
                                 # TODO: 12. alertLevel도 get("alertLevel, 0")으로 받아오기 [OK]
                                 alertFlag = item.get("alertFlag", False)
-                                alertLevel = node.get("alertLevel", 0)
+                                alertLevel = item.get("alertLevel", 0)
                                 lst.append(
                                     dict(
                                         name=key, v=str(item["v"]), alertFlag=alertFlag, alertLevel=alertLevel
@@ -606,13 +609,14 @@ async def checkLoop():
 
         await asyncio.sleep(5)
 
-# TODO: 주석 수정
+# TODO: 주석 수정 [OK]
 """
     name: SERVER_NAME
     items:
       - name: cpu
         v: 99%
         alertFlag: True
+        alertLevel: 2
 
     groups:
       - name: engt
@@ -620,9 +624,11 @@ async def checkLoop():
           - name: err
             v: Error occurs
             alertFlag: True
+            alertLevel: 1
           - name: ts
             v: 00:21
             alertFlag: False
+            alertLevel: 0
 """
 
 
