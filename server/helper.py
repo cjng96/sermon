@@ -95,7 +95,8 @@ def main():
                                 ss = fp.read()
                             st = json.loads(ss)
                         except Exception as e:
-                            st = dict(err=dict(v=str(e), alertFlag=True))
+                            # TODO: 1. alertLevel = 2로 추가 [OK] -> alertFlag의 하위 호환성을 위해
+                            st = dict(err=dict(v=str(e), alertFlag=True, alertLevel=2))
 
                         result["apps"][item["name"]] = st
                     else:
@@ -103,7 +104,8 @@ def main():
                         raise Exception(f"unknown dict type[{tt}]")
 
                 else:
-                    result["err"] = dict(v="unknown monitor data type[%s]!!" % type(item), alertFlag=True)
+                    # TODO: 2. alertLevel = 2로 추가 [OK] -> alertFlag의 하위 호환성을 위해
+                    result["err"] = dict(v="unknown monitor data type[%s]!!" % type(item), alertFlag=True, alertLevel=2)
 
             log.write("result %s\n" % json.dumps(result))
             print(json.dumps(result))

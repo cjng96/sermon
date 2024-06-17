@@ -37,11 +37,13 @@ class ServerStatusPage extends StatefulWidget {
   _ServerStatusPageState createState() => _ServerStatusPageState();
 }
 
+// TODO: alertLevel Field 추가 [OK]
 class StItem {
-  StItem(this.name, this.alertFlag, this.type, this.v);
+  StItem(this.name, this.alertFlag, this.alertLevel, this.type, this.v);
   factory StItem.fromJson(Map<String, dynamic> json) => StItem(
         json['name'] as String,
         json['alertFlag'] as bool? ?? false,
+        json['alertLevel'] as int? ?? 0,
         json['type'] as String? ?? '',
         json['v'] as String? ?? '', // name:newline, type:sp의 경우 v가 없다
       );
@@ -49,12 +51,14 @@ class StItem {
         'name': name,
         'type': type,
         'alertFlag': alertFlag,
+        'alertLevel': alertLevel,
         'v': v,
       };
 
   String name;
   String type; // ''(일반적), 'sp'(newline등)
   bool alertFlag;
+  int alertLevel;
   String v;
 }
 
@@ -123,6 +127,18 @@ String duration2str(Duration d) {
   }
 
   return ss;
+}
+
+// alertLevel별 알맞는 색상 추출
+// TODO: 색상 지정하기 [OK]
+Color getErrColor(int alertLevel, bool progressBarFlag) {
+  if (alertLevel >= 2) {
+    return Colors.red;
+  } else if (alertLevel == 1) {
+    return Color(0xFFFFAA00);
+  } else {
+    return progressBarFlag ? Colors.blue.withAlpha(40) : Colors.black;
+  }
 }
 
 class _ServerStatusPageState extends State<ServerStatusPage> {
@@ -241,7 +257,25 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                   if (m != null) {
                     final percent = int.parse(m.group(1)!);
                     final total = m.group(2);
-                    final cr = item.alertFlag ? Colors.red : Colors.blue.withAlpha(40);
+
+                    // TODO: alert 상태별 색상 지정 [OK]
+                    Color cr = Colors.blue.withAlpha(40);
+                    if (item.alertFlag || item.alertLevel > 0) {
+                      // alertFlag와 alertLevel 둘 다 있는 경우
+                      if (item.alertFlag && item.alertLevel > 0) {
+                        cr = getErrColor(item.alertLevel, true);
+                      }
+
+                      // alertFlag만 있는 경우
+                      else if (item.alertFlag && item.alertLevel == 0) {
+                        cr = Colors.red;
+                      }
+
+                      // alertLevel만 있는 경우
+                      else if (!item.alertFlag && item.alertLevel > 0) {
+                        cr = getErrColor(item.alertLevel, true);
+                      }
+                    }
                     w = LinearPercentIndicator(
                       width: 150.0,
                       animation: true,
@@ -266,7 +300,24 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                   if (m != null) {
                     final used = int.parse(m.group(1)!);
                     final total = int.parse(m.group(2)!);
-                    final cr = item.alertFlag ? Colors.red : Colors.blue.withAlpha(40);
+                    // TODO: alert 상태별 색상 지정 [OK]
+                    Color cr = Colors.blue.withAlpha(40);
+                    if (item.alertFlag || item.alertLevel > 0) {
+                      // alertFlag와 alertLevel 둘 다 있는 경우
+                      if (item.alertFlag && item.alertLevel > 0) {
+                        cr = getErrColor(item.alertLevel, true);
+                      }
+
+                      // alertFlag만 있는 경우
+                      else if (item.alertFlag && item.alertLevel == 0) {
+                        cr = Colors.red;
+                      }
+
+                      // alertLevel만 있는 경우
+                      else if (!item.alertFlag && item.alertLevel > 0) {
+                        cr = getErrColor(item.alertLevel, true);
+                      }
+                    }
                     w = LinearPercentIndicator(
                       width: 150.0,
                       animation: true,
@@ -286,11 +337,30 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
               }
 
               if (w == null) {
+                // TODO: alert 상태별 색상 지정 [OK]
+                Color cr = Colors.black;
+                if (item.alertFlag || item.alertLevel > 0) {
+                  // alertFlag와 alertLevel 둘 다 있는 경우
+                  if (item.alertFlag && item.alertLevel > 0) {
+                    cr = getErrColor(item.alertLevel, false);
+                  }
+
+                  // alertFlag만 있는 경우
+                  else if (item.alertFlag && item.alertLevel == 0) {
+                    cr = Colors.red;
+                  }
+
+                  // alertLevel만 있는 경우
+                  else if (!item.alertFlag && item.alertLevel > 0) {
+                    cr = getErrColor(item.alertLevel, false);
+                  }
+                }
+
                 w = Text(
                   '${item.name}: ${item.v} ',
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                    color: item.alertFlag ? Colors.red : Colors.black,
+                    color: cr,
                     // fontFeatures: [FontFeature.tabularFigures()],
                     // fontFeatures: [FontFeature.enable('lnum')],
                   ),
@@ -327,10 +397,29 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
 
               // print('name ${item.name} - ${item.v} - $cellCnt');
 
+              // TODO: alert 상태별 색상 지정 [OK]
+              Color cr = Colors.black;
+              if (item.alertFlag || item.alertLevel > 0) {
+                // alertFlag와 alertLevel 둘 다 있는 경우
+                if (item.alertFlag && item.alertLevel > 0) {
+                  cr = getErrColor(item.alertLevel, false);
+                }
+
+                // alertFlag만 있는 경우
+                else if (item.alertFlag && item.alertLevel == 0) {
+                  cr = Colors.red;
+                }
+
+                // alertLevel만 있는 경우
+                else if (!item.alertFlag && item.alertLevel > 0) {
+                  cr = getErrColor(item.alertLevel, false);
+                }
+              }
+
               final txt = Text('${item.name}: ${item.v} ',
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                    color: item.alertFlag ? Colors.red : Colors.black,
+                    color: cr,
                     // fontFeatures: [FontFeature.tabularFigures()],
                     // fontFeatures: [FontFeature.enable('lnum')],
                   ));

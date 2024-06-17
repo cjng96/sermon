@@ -93,6 +93,7 @@ class Server:
 
         return True
 
+    # TODO: 주석 수정
     def getStatus(self):
         """
         name: SERVER_NAME
@@ -126,29 +127,61 @@ class Server:
                     items.append(dict(name="newline", type="sp"))
                 elif item == "cpu":
                     items.append(
-                        dict(name=item, v="%.1f%%" % vv, alertFlag=False)
+                        # TODO: 3. alertLevel 추가 [OK]
+                        dict(name=item, v="%.1f%%" % vv, alertFlag=False, alertLevel=0)
                     )  # vv > 80))
                 elif item == "load":
                     avg = vv["avg"]
                     st = "[%d] %.1f,%.1f,%.1f" % (vv["cnt"], avg[0], avg[1], avg[2])
                     alertFlag = avg[1] > vv["cnt"] * 0.8  # 10분간 80%이상
-                    items.append(dict(name=item, v=st, alertFlag=alertFlag))
+
+                    # TODO: 4. 10분간 80%면 Warning, 90% 이상이면 경고 [OK]
+                    alertLevel = 0
+                    if avg[1] > vv["cnt"] * 0.9:
+                        alertLevel = 2
+                    elif avg[1] > vv["cnt"] * 0.8:
+                        alertLevel = 1
+
+                    items.append(dict(name=item, v=st, alertFlag=alertFlag, alertLevel=alertLevel))
                 elif item == "mem":
                     st = "%d%%(%dMB)" % (vv["percent"], int(vv["total"] / 1024 / 1024))
-                    items.append(dict(name=item, v=st, alertFlag=vv["percent"] > 90))
+                    # TODO: 5. 90% 이상이면 WARNING, 95% 이상이면 경고 [OK]
+                    alertLevel = 0
+                    if vv["percent"] > 95:
+                        alertLevel = 2
+                    elif vv["percent"] > 90:
+                        alertFlag =1
+
+                    items.append(dict(name=item, v=st, alertFlag=vv["percent"] > 90, alertLevel=alertLevel))
                 elif item == "swap":
                     st = "%d%%(%dMB)" % (vv["percent"], int(vv["total"] / 1024 / 1024))
-                    items.append(dict(name=item, v=st, alertFlag=vv["percent"] > 90))
+                    # TODO: 6. 90% 이상이면 WARNING, 95% 이상이면 경고 [OK]
+                    alertLevel = 0
+                    if vv["percent"] > 95:
+                        alertLevel = 2
+                    elif vv["percent"] > 90:
+                        alertLevel = 1
+
+                    items.append(dict(name=item, v=st, alertFlag=vv["percent"] > 90, alertLevel=alertLevel))
                 elif item == "disk":
                     st = "%dG/%dG" % (
                         vv["used"] / 1024 / 1024 / 1024,
                         vv["total"] / 1024 / 1024 / 1024,
                     )
+
+                    # TODO: 7: 5GB 남으면 level 1, 1GB 남으면 level 2 [OK]
+                    alertLevel = 0
+                    if vv["free"] < 1024 * 1024 * 1:
+                        alertLevel = 2
+                    elif vv["free"] < 1024 * 1024 * 5:
+                        alertLevel = 1
+
                     items.append(
                         dict(
                             name=item,
                             v=st,
                             alertFlag=vv["free"] < 1024 * 1024 * 1024 * 5,
+                            alertLevel = alertLevel
                         )
                     )
                 else:
@@ -164,11 +197,20 @@ class Server:
                         vv["used"] / 1024 / 1024 / 1024,
                         vv["total"] / 1024 / 1024 / 1024,
                     )
+
+                    # TODO: 8. 5GB 남으면 level 1, 1GB 남으면 level 2 [OK]
+                    alertLevel = 0
+                    if vv["free"] < 1024 * 1024 * 1:
+                        alertLevel = 2
+                    elif vv["free"] < 1024 * 1024 * 5:
+                        alertLevel = 1
+
                     items.append(
                         dict(
                             name=name,
                             v=st,
                             alertFlag=vv["free"] < 1024 * 1024 * 1024 * 5,
+                            alertLevel=alertLevel
                         )
                     )
                 elif tt == "mdadm":
@@ -176,8 +218,14 @@ class Server:
                     vv = self.status["mdadms"][name]
 
                     st = "%d/%d" % (vv["act"], vv["tot"])
+
+                    # TODO: 9. 여기는 바로 level 2 [OK]
+                    alertLevel = 0
+                    if vv["act"] != vv["tot"]:
+                        alertLevel = 2
+
                     items.append(
-                        dict(name=name, v=st, alertFlag=vv["act"] != vv["tot"])
+                        dict(name=name, v=st, alertFlag=vv["act"] != vv["tot"], alertLevel=alertLevel)
                     )
 
                 elif tt == "app":
@@ -190,8 +238,12 @@ class Server:
                     if ts is not None:
                         now = time.time()
                         gap = now - ts
+                        # TODO: 10. 여기는 바로 level 2 [OK]
+                        alertLevel = 0
+                        if gap > 60:
+                            alertLevel = 2
                         lst.append(
-                            dict(name="ts", v=tsGap2str(gap), alertFlag=gap > 60)
+                            dict(name="ts", v=tsGap2str(gap), alertFlag=gap > 60, alertLevel=alertLevel)
                         )
 
                     for key in vv:
@@ -200,26 +252,32 @@ class Server:
                             continue
                         elif key == "arr":
                             for node in item:
+                                # TODO: 11. alertLevel도 get("alertLevel, 0")으로 받아오기 [OK]
                                 alertFlag = node.get("alertFlag", False)
+                                alertLevel = node.get("alertLevel", 0)
                                 lst.append(
                                     dict(
                                         name=node["n"],
                                         v=str(node["v"]),
                                         alertFlag=alertFlag,
+                                        alertLevel=alertLevel
                                     )
                                 )
                         else:
                             if type(item) is dict:
                                 # alertFlag = item["alertFlag"] if "alertFlag" in item else False
+                                # TODO: 12. alertLevel도 get("alertLevel, 0")으로 받아오기 [OK]
                                 alertFlag = item.get("alertFlag", False)
+                                alertLevel = node.get("alertLevel", 0)
                                 lst.append(
                                     dict(
-                                        name=key, v=str(item["v"]), alertFlag=alertFlag
+                                        name=key, v=str(item["v"]), alertFlag=alertFlag, alertLevel=alertLevel
                                     )
                                 )
                             else:
                                 # old style
-                                lst.append(dict(name=key, v=str(item), alertFlag=False))
+                                # TODO: 13. alertLevel=0 [OK]
+                                lst.append(dict(name=key, v=str(item), alertFlag=False, alertLevel=0))
 
                     groups.append(dict(name=name, items=lst))
 
@@ -447,12 +505,36 @@ async def checkLoop():
         for ser in result:
             notiCtx += "<br><br>%s - " % ser["name"]
 
+            # TODO: alertLevel 별로 font 색 지정 [OK]
             for item in ser["items"]:
-                if item.get("alertFlag", False):
-                    notiCtx += '<font color="red">%s(%s),</font>&nbsp;' % (
-                        item["name"],
-                        item["v"],
-                    )
+                alertFlag = item.get("alertFlag", False)
+                alertLevel = item.get("alertLevel", 0)
+                if alertFlag or alertLevel:
+                    # alertFlag값과 alertLevel 둘 다 있는 경우
+                    if alertFlag and alertLevel > 0:
+                        fontColor = getErrFontColor(alertLevel)
+                        notiCtx += '<span style="color: %s;">%s(%s),</span>&nbsp;' % (
+                            fontColor,
+                            item["name"],
+                            item["v"],
+                        )
+
+                    # alertFlag만 있는 경우
+                    if alertFlag and alertLevel == 0:
+                        notiCtx += '<span style="color: red;">%s(%s),</span>&nbsp;' % (
+                            item["name"],
+                            item["v"],
+                        )
+
+                    # alertLevel만 있는 경우
+                    if not alertFlag and alertLevel > 0:
+                        fontColor = getErrFontColor(alertLevel)
+                        notiCtx += '<span style="color: %s;">%s(%s),</span>&nbsp;' % (
+                            fontColor,
+                            item["name"],
+                            item["v"],
+                        )
+
                     name = "%s/%s" % (ser["name"], item["name"])
                     if _errNew(name):
                         print("new err - %s" % name)
@@ -463,11 +545,36 @@ async def checkLoop():
                 notiCtx += "<br>&nbsp;&nbsp;%s - " % group["name"]
 
                 for item in group["items"]:
-                    if item.get("alertFlag", False):
-                        notiCtx += '<font color="red">%s(%s),</font>&nbsp;' % (
-                            item["name"],
-                            item["v"],
-                        )
+                    # TODO: alertLevel 별로 font 색 지정 [OK]
+                    alertFlag = item.get("alertFlag", False)
+                    alertLevel = item.get("alertLevel", 0)
+                    if alertFlag or alertLevel:
+                        # alertFlag값과 alertLevel 둘 다 있는 경우
+                        if alertFlag and alertLevel > 0:
+                            fontColor = getErrFontColor(alertLevel)
+                            notiCtx += '<span style="color: %s;">%s(%s),</span>&nbsp;' % (
+                                fontColor,
+                                item["name"],
+                                item["v"],
+                            )
+
+                        # alertFlag만 있는 경우
+                        if alertFlag and alertLevel == 0:
+                            notiCtx += '<span style="color: red;">%s(%s),</span>&nbsp;' % (
+                                item["name"],
+                                item["v"],
+                            )
+
+                        # alertLevel만 있는 경우
+                        if not alertFlag and alertLevel > 0:
+                            fontColor = getErrFontColor(alertLevel)
+                            notiCtx += '<span style="color: %s;">%s(%s),</span>&nbsp;' % (
+                                fontColor,
+                                item["name"],
+                                item["v"],
+                            )
+
+
                         name = "%s/%s/%s" % (ser["name"], group["name"], item["name"])
                         if _errNew(name):
                             print("new err - %s" % (name))
@@ -499,7 +606,7 @@ async def checkLoop():
 
         await asyncio.sleep(5)
 
-
+# TODO: 주석 수정
 """
     name: SERVER_NAME
     items:

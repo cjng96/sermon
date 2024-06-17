@@ -46,3 +46,12 @@ def dictMerge(dic, dic2):
             newDic[k] = copy.deepcopy(dic2[k])
 
     return newDic
+
+# alertLevel에 따라 빨강, 밝은 주황, 검은색 return
+def getErrFontColor(alertLevel):
+    if alertLevel == 2:
+        return 'red'
+    elif alertLevel == 1:
+        return '#FFAA00'
+    else:
+        return 'black'
