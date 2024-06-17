@@ -93,7 +93,6 @@ class Server:
 
         return True
 
-    # TODO: 주석 수정 [OK]
     def getStatus(self):
         """
         name: SERVER_NAME
@@ -130,7 +129,6 @@ class Server:
                     items.append(dict(name="newline", type="sp"))
                 elif item == "cpu":
                     items.append(
-                        # TODO: 3. alertLevel 추가 [OK]
                         dict(name=item, v="%.1f%%" % vv, alertFlag=False, alertLevel=0)
                     )  # vv > 80))
                 elif item == "load":
@@ -138,7 +136,6 @@ class Server:
                     st = "[%d] %.1f,%.1f,%.1f" % (vv["cnt"], avg[0], avg[1], avg[2])
                     alertFlag = avg[1] > vv["cnt"] * 0.8  # 10분간 80%이상
 
-                    # TODO: 4. 10분간 80%면 Warning, 90% 이상이면 경고 [OK]
                     alertLevel = 0
                     if avg[1] > vv["cnt"] * 0.9:
                         alertLevel = 2
@@ -148,7 +145,6 @@ class Server:
                     items.append(dict(name=item, v=st, alertFlag=alertFlag, alertLevel=alertLevel))
                 elif item == "mem":
                     st = "%d%%(%dMB)" % (vv["percent"], int(vv["total"] / 1024 / 1024))
-                    # TODO: 5. 90% 이상이면 WARNING, 95% 이상이면 경고 [OK]
                     alertLevel = 0
                     if vv["percent"] > 95:
                         alertLevel = 2
@@ -158,7 +154,6 @@ class Server:
                     items.append(dict(name=item, v=st, alertFlag=vv["percent"] > 90, alertLevel=alertLevel))
                 elif item == "swap":
                     st = "%d%%(%dMB)" % (vv["percent"], int(vv["total"] / 1024 / 1024))
-                    # TODO: 6. 90% 이상이면 WARNING, 95% 이상이면 경고 [OK]
                     alertLevel = 0
                     if vv["percent"] > 95:
                         alertLevel = 2
@@ -172,7 +167,6 @@ class Server:
                         vv["total"] / 1024 / 1024 / 1024,
                     )
 
-                    # TODO: 7: 5GB 남으면 level 1, 1GB 남으면 level 2 [OK]
                     alertLevel = 0
                     if vv["free"] < 1024 * 1024 * 1:
                         alertLevel = 2
@@ -201,7 +195,6 @@ class Server:
                         vv["total"] / 1024 / 1024 / 1024,
                     )
 
-                    # TODO: 8. 5GB 남으면 level 1, 1GB 남으면 level 2 [OK]
                     alertLevel = 0
                     if vv["free"] < 1024 * 1024 * 1:
                         alertLevel = 2
@@ -222,7 +215,6 @@ class Server:
 
                     st = "%d/%d" % (vv["act"], vv["tot"])
 
-                    # TODO: 9. 여기는 바로 level 2 [OK]
                     alertLevel = 0
                     if vv["act"] != vv["tot"]:
                         alertLevel = 2
@@ -241,7 +233,6 @@ class Server:
                     if ts is not None:
                         now = time.time()
                         gap = now - ts
-                        # TODO: 10. 여기는 바로 level 2 [OK]
                         alertLevel = 0
                         if gap > 60:
                             alertLevel = 2
@@ -255,7 +246,6 @@ class Server:
                             continue
                         elif key == "arr":
                             for node in item:
-                                # TODO: 11. alertLevel도 get("alertLevel, 0")으로 받아오기 [OK]
                                 alertFlag = node.get("alertFlag", False)
                                 alertLevel = node.get("alertLevel", 0)
                                 lst.append(
@@ -269,7 +259,6 @@ class Server:
                         else:
                             if type(item) is dict:
                                 # alertFlag = item["alertFlag"] if "alertFlag" in item else False
-                                # TODO: 12. alertLevel도 get("alertLevel, 0")으로 받아오기 [OK]
                                 alertFlag = item.get("alertFlag", False)
                                 alertLevel = item.get("alertLevel", 0)
                                 lst.append(
@@ -279,7 +268,6 @@ class Server:
                                 )
                             else:
                                 # old style
-                                # TODO: 13. alertLevel=0 [OK]
                                 lst.append(dict(name=key, v=str(item), alertFlag=False, alertLevel=0))
 
                     groups.append(dict(name=name, items=lst))
@@ -508,7 +496,6 @@ async def checkLoop():
         for ser in result:
             notiCtx += "<br><br>%s - " % ser["name"]
 
-            # TODO: alertLevel 별로 font 색 지정 [OK]
             for item in ser["items"]:
                 alertFlag = item.get("alertFlag", False)
                 alertLevel = item.get("alertLevel", 0)
@@ -548,7 +535,6 @@ async def checkLoop():
                 notiCtx += "<br>&nbsp;&nbsp;%s - " % group["name"]
 
                 for item in group["items"]:
-                    # TODO: alertLevel 별로 font 색 지정 [OK]
                     alertFlag = item.get("alertFlag", False)
                     alertLevel = item.get("alertLevel", 0)
                     if alertFlag or alertLevel:
@@ -609,7 +595,6 @@ async def checkLoop():
 
         await asyncio.sleep(5)
 
-# TODO: 주석 수정 [OK]
 """
     name: SERVER_NAME
     items:

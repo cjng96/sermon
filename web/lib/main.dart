@@ -37,7 +37,6 @@ class ServerStatusPage extends StatefulWidget {
   _ServerStatusPageState createState() => _ServerStatusPageState();
 }
 
-// TODO: alertLevel Field 추가 [OK]
 class StItem {
   StItem(this.name, this.alertFlag, this.alertLevel, this.type, this.v);
   factory StItem.fromJson(Map<String, dynamic> json) => StItem(
@@ -130,7 +129,6 @@ String duration2str(Duration d) {
 }
 
 // alertLevel별 알맞는 색상 추출
-// TODO: 색상 지정하기 [OK]
 Color getErrColor(int alertLevel, bool progressBarFlag) {
   if (alertLevel >= 2) {
     return Colors.red;
@@ -165,7 +163,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
     const urlEnv = kReleaseMode
         ? String.fromEnvironment('SERVER_URL', defaultValue: 'http://localhost:25090/cmd')
         : 'http://sermon.retailtrend.net/cmd';
-    var url = 'http://localhost:25090/cmd';
+    var url = urlEnv;
     //url = 'https://sermon.mmx.kr:33/cmd';
 
     print('url - $url');
@@ -258,7 +256,6 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                     final percent = int.parse(m.group(1)!);
                     final total = m.group(2);
 
-                    // TODO: alert 상태별 색상 지정 [OK]
                     Color cr = Colors.blue.withAlpha(40);
                     if (item.alertFlag || item.alertLevel > 0) {
                       // alertFlag와 alertLevel 둘 다 있는 경우
@@ -300,7 +297,6 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                   if (m != null) {
                     final used = int.parse(m.group(1)!);
                     final total = int.parse(m.group(2)!);
-                    // TODO: alert 상태별 색상 지정 [OK]
                     Color cr = Colors.blue.withAlpha(40);
                     if (item.alertFlag || item.alertLevel > 0) {
                       // alertFlag와 alertLevel 둘 다 있는 경우
@@ -337,7 +333,6 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
               }
 
               if (w == null) {
-                // TODO: alert 상태별 색상 지정 [OK]
                 Color cr = Colors.black;
                 if (item.alertFlag || item.alertLevel > 0) {
                   // alertFlag와 alertLevel 둘 다 있는 경우
@@ -397,7 +392,6 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
 
               // print('name ${item.name} - ${item.v} - $cellCnt');
 
-              // TODO: alert 상태별 색상 지정 [OK]
               Color cr = Colors.black;
               if (item.alertFlag || item.alertLevel > 0) {
                 // alertFlag와 alertLevel 둘 다 있는 경우
