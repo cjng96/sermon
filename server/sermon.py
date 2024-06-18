@@ -499,32 +499,14 @@ async def checkLoop():
             for item in ser["items"]:
                 alertFlag = item.get("alertFlag", False)
                 alertLevel = item.get("alertLevel", 0)
-                if alertFlag or alertLevel:
-                    # alertFlag값과 alertLevel 둘 다 있는 경우
-                    if alertFlag and alertLevel > 0:
-                        fontColor = getErrFontColor(alertLevel)
-                        notiCtx += '<span style="color: %s;">%s(%s),</span>&nbsp;' % (
+                fontColor = getErrCrForAlertFlag(alertFlag, alertLevel, 'black')
+                notiCtx += '<span style="color: %s;">%s(%s),</span>&nbsp;' % (
                             fontColor,
                             item["name"],
                             item["v"],
                         )
 
-                    # alertFlag만 있는 경우
-                    if alertFlag and alertLevel == 0:
-                        notiCtx += '<span style="color: red;">%s(%s),</span>&nbsp;' % (
-                            item["name"],
-                            item["v"],
-                        )
-
-                    # alertLevel만 있는 경우
-                    if not alertFlag and alertLevel > 0:
-                        fontColor = getErrFontColor(alertLevel)
-                        notiCtx += '<span style="color: %s;">%s(%s),</span>&nbsp;' % (
-                            fontColor,
-                            item["name"],
-                            item["v"],
-                        )
-
+                if alertFlag or alertLevel > 0:
                     name = "%s/%s" % (ser["name"], item["name"])
                     if _errNew(name):
                         print("new err - %s" % name)
@@ -537,33 +519,13 @@ async def checkLoop():
                 for item in group["items"]:
                     alertFlag = item.get("alertFlag", False)
                     alertLevel = item.get("alertLevel", 0)
-                    if alertFlag or alertLevel:
-                        # alertFlag값과 alertLevel 둘 다 있는 경우
-                        if alertFlag and alertLevel > 0:
-                            fontColor = getErrFontColor(alertLevel)
-                            notiCtx += '<span style="color: %s;">%s(%s),</span>&nbsp;' % (
-                                fontColor,
-                                item["name"],
-                                item["v"],
-                            )
-
-                        # alertFlag만 있는 경우
-                        if alertFlag and alertLevel == 0:
-                            notiCtx += '<span style="color: red;">%s(%s),</span>&nbsp;' % (
-                                item["name"],
-                                item["v"],
-                            )
-
-                        # alertLevel만 있는 경우
-                        if not alertFlag and alertLevel > 0:
-                            fontColor = getErrFontColor(alertLevel)
-                            notiCtx += '<span style="color: %s;">%s(%s),</span>&nbsp;' % (
-                                fontColor,
-                                item["name"],
-                                item["v"],
-                            )
-
-
+                    fontColor = getErrCrForAlertFlag(alertFlag, alertLevel, 'black')
+                    notiCtx += '<span style="color: %s;">%s(%s),</span>&nbsp;' % (
+                            fontColor,
+                            item["name"],
+                            item["v"],
+                        )
+                    if alertFlag or alertLevel > 0:
                         name = "%s/%s/%s" % (ser["name"], group["name"], item["name"])
                         if _errNew(name):
                             print("new err - %s" % (name))

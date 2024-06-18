@@ -129,14 +129,37 @@ String duration2str(Duration d) {
 }
 
 // alertLevel별 알맞는 색상 추출
-Color getErrColor(int alertLevel, bool progressBarFlag) {
+Color getErrCr(int alertLevel, Color defaultColor) {
   if (alertLevel >= 2) {
     return Colors.red;
   } else if (alertLevel == 1) {
     return Colors.orange;
   } else {
-    return progressBarFlag ? Colors.blue.withAlpha(40) : Colors.black;
+    return defaultColor;
   }
+}
+
+// alertFlag와 호환을 위한 색상 추출 함수
+// @Depreciate:  alertFlag가 alertLevel로 완전히 대체되면 사라질 함수
+Color getErrCrForAlertFlag(bool alertFlag, int alertLevel, Color defaultColor) {
+  Color cr = defaultColor;
+  if (alertFlag || alertLevel > 0) {
+    // alertFlag와 alertLevel 둘 다 있는 경우 - alertLevel 사용
+    if (alertFlag && alertLevel > 0) {
+      cr = getErrCr(alertLevel, defaultColor);
+    }
+
+    // alertFlag만 있는 경우 - alertFlag 사용
+    if (alertFlag && alertLevel == 0) {
+      cr = Colors.red;
+    }
+
+    // alertLevel만 있는 경우 - alertLevel 사용
+    if (!alertFlag && alertLevel > 0) {
+      cr = getErrCr(alertLevel, defaultColor);
+    }
+  }
+  return cr;
 }
 
 class _ServerStatusPageState extends State<ServerStatusPage> {
@@ -162,7 +185,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
 
     const urlEnv = kReleaseMode
         ? String.fromEnvironment('SERVER_URL', defaultValue: 'http://localhost:25090/cmd')
-        : 'http://sermon.retailtrend.net/cmd';
+        : 'http://localhost:25090/cmd';
     var url = urlEnv;
     //url = 'https://sermon.mmx.kr:33/cmd';
 
@@ -256,23 +279,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                     final percent = int.parse(m.group(1)!);
                     final total = m.group(2);
 
-                    Color cr = Colors.blue.withAlpha(40);
-                    if (item.alertFlag || item.alertLevel > 0) {
-                      // alertFlag와 alertLevel 둘 다 있는 경우
-                      if (item.alertFlag && item.alertLevel > 0) {
-                        cr = getErrColor(item.alertLevel, true);
-                      }
-
-                      // alertFlag만 있는 경우
-                      if (item.alertFlag && item.alertLevel == 0) {
-                        cr = Colors.red;
-                      }
-
-                      // alertLevel만 있는 경우
-                      if (!item.alertFlag && item.alertLevel > 0) {
-                        cr = getErrColor(item.alertLevel, true);
-                      }
-                    }
+                    Color cr = getErrCrForAlertFlag(item.alertFlag, item.alertLevel, Colors.blue.withAlpha(40));
                     w = LinearPercentIndicator(
                       width: 150.0,
                       animation: true,
@@ -297,23 +304,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                   if (m != null) {
                     final used = int.parse(m.group(1)!);
                     final total = int.parse(m.group(2)!);
-                    Color cr = Colors.blue.withAlpha(40);
-                    if (item.alertFlag || item.alertLevel > 0) {
-                      // alertFlag와 alertLevel 둘 다 있는 경우
-                      if (item.alertFlag && item.alertLevel > 0) {
-                        cr = getErrColor(item.alertLevel, true);
-                      }
-
-                      // alertFlag만 있는 경우
-                      if (item.alertFlag && item.alertLevel == 0) {
-                        cr = Colors.red;
-                      }
-
-                      // alertLevel만 있는 경우
-                      if (!item.alertFlag && item.alertLevel > 0) {
-                        cr = getErrColor(item.alertLevel, true);
-                      }
-                    }
+                    Color cr = getErrCrForAlertFlag(item.alertFlag, item.alertLevel, Colors.blue.withAlpha(40));
                     w = LinearPercentIndicator(
                       width: 150.0,
                       animation: true,
@@ -333,23 +324,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
               }
 
               if (w == null) {
-                Color cr = Colors.black;
-                if (item.alertFlag || item.alertLevel > 0) {
-                  // alertFlag와 alertLevel 둘 다 있는 경우
-                  if (item.alertFlag && item.alertLevel > 0) {
-                    cr = getErrColor(item.alertLevel, false);
-                  }
-
-                  // alertFlag만 있는 경우
-                  if (item.alertFlag && item.alertLevel == 0) {
-                    cr = Colors.red;
-                  }
-
-                  // alertLevel만 있는 경우
-                  if (!item.alertFlag && item.alertLevel > 0) {
-                    cr = getErrColor(item.alertLevel, false);
-                  }
-                }
+                Color cr = getErrCrForAlertFlag(item.alertFlag, item.alertLevel, Colors.black);
 
                 w = Text(
                   '${item.name}: ${item.v} ',
@@ -392,23 +367,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
 
               // print('name ${item.name} - ${item.v} - $cellCnt');
 
-              Color cr = Colors.black;
-              if (item.alertFlag || item.alertLevel > 0) {
-                // alertFlag와 alertLevel 둘 다 있는 경우
-                if (item.alertFlag && item.alertLevel > 0) {
-                  cr = getErrColor(item.alertLevel, false);
-                }
-
-                // alertFlag만 있는 경우
-                if (item.alertFlag && item.alertLevel == 0) {
-                  cr = Colors.red;
-                }
-
-                // alertLevel만 있는 경우
-                if (!item.alertFlag && item.alertLevel > 0) {
-                  cr = getErrColor(item.alertLevel, false);
-                }
-              }
+              Color cr = getErrCrForAlertFlag(item.alertFlag, item.alertLevel, Colors.black);
 
               final txt = Text('${item.name}: ${item.v} ',
                   textAlign: TextAlign.left,
