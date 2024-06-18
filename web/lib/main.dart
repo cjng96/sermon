@@ -185,7 +185,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
 
     const urlEnv = kReleaseMode
         ? String.fromEnvironment('SERVER_URL', defaultValue: 'http://localhost:25090/cmd')
-        : 'http://localhost:25090/cmd';
+        : 'http://sermon.retailtrend.net/cmd';
     var url = urlEnv;
     //url = 'https://sermon.mmx.kr:33/cmd';
 
