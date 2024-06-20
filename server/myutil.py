@@ -31,6 +31,8 @@ import copy
 # import collections
 from collections.abc import Mapping
 
+from sermon import WarningStatus
+
 
 # https://gist.github.com/angstwad/bf22d1822c38a92ec0a9
 def dictMerge(dic, dic2):
@@ -46,3 +48,19 @@ def dictMerge(dic, dic2):
             newDic[k] = copy.deepcopy(dic2[k])
 
     return newDic
+
+# alertFlag 값을 "e", "n", "w"로 변환해주는 함수
+def getAlertFlag(item):
+    alertFlag = item.get("alertFlag", WarningStatus.NORMAL.value)
+    if isinstance(alertFlag, bool):
+        alertFlag = WarningStatus.ERROR.value if alertFlag else WarningStatus.NORMAL.value
+    return alertFlag
+
+# alertFlagl에 따라 빨강, 밝은 주황, defaultColor return
+def getErrCr(alertFlag, defaultColor):
+    if alertFlag == WarningStatus.ERROR.value:
+        return 'red'
+    elif alertFlag == WarningStatus.WARNING.value:
+        return '#FFAA00'
+    else:
+        return defaultColor

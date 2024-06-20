@@ -13,6 +13,17 @@ import 'package:percent_indicator/percent_indicator.dart';
 
 import 'platformOther.dart' if (kIsWeb) 'platformWeb.dart';
 
+enum WarningStatus {
+  ERROR('e', 'E'), // 바로 초치해야하는 수준
+  WARNING('w', 'W'), // 당장 문제는 없지만 예의주시
+  NORMAL('n', 'N'); // 정상
+
+  final String lowerCaseValue;
+  final String upperCaseValue;
+
+  const WarningStatus(this.lowerCaseValue, this.upperCaseValue);
+}
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -41,7 +52,7 @@ class StItem {
   StItem(this.name, this.alertFlag, this.type, this.v);
   factory StItem.fromJson(Map<String, dynamic> json) => StItem(
         json['name'] as String,
-        json['alertFlag'] as bool? ?? false,
+        json['alertFlag'] as String? ?? WarningStatus.NORMAL.lowerCaseValue,
         json['type'] as String? ?? '',
         json['v'] as String? ?? '', // name:newline, type:sp의 경우 v가 없다
       );
@@ -54,7 +65,7 @@ class StItem {
 
   String name;
   String type; // ''(일반적), 'sp'(newline등)
-  bool alertFlag;
+  String alertFlag;
   String v;
 }
 
@@ -123,6 +134,17 @@ String duration2str(Duration d) {
   }
 
   return ss;
+}
+
+// alertLevel별 알맞는 색상 추출
+Color getErrCr(String alertFlag, Color defaultColor) {
+  if (alertFlag == WarningStatus.ERROR.lowerCaseValue || alertFlag == WarningStatus.ERROR.upperCaseValue) {
+    return Colors.red;
+  } else if (alertFlag == WarningStatus.WARNING.lowerCaseValue || alertFlag == WarningStatus.WARNING.upperCaseValue) {
+    return Colors.orange;
+  } else {
+    return defaultColor;
+  }
 }
 
 class _ServerStatusPageState extends State<ServerStatusPage> {
@@ -241,7 +263,8 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                   if (m != null) {
                     final percent = int.parse(m.group(1)!);
                     final total = m.group(2);
-                    final cr = item.alertFlag ? Colors.red : Colors.blue.withAlpha(40);
+
+                    Color cr = getErrCr(item.alertFlag, Colors.blue.withAlpha(40));
                     w = LinearPercentIndicator(
                       width: 150.0,
                       animation: true,
@@ -266,7 +289,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                   if (m != null) {
                     final used = int.parse(m.group(1)!);
                     final total = int.parse(m.group(2)!);
-                    final cr = item.alertFlag ? Colors.red : Colors.blue.withAlpha(40);
+                    Color cr = getErrCr(item.alertFlag, Colors.blue.withAlpha(40));
                     w = LinearPercentIndicator(
                       width: 150.0,
                       animation: true,
@@ -286,11 +309,13 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
               }
 
               if (w == null) {
+                Color cr = getErrCr(item.alertFlag, Colors.black);
+
                 w = Text(
                   '${item.name}: ${item.v} ',
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                    color: item.alertFlag ? Colors.red : Colors.black,
+                    color: cr,
                     // fontFeatures: [FontFeature.tabularFigures()],
                     // fontFeatures: [FontFeature.enable('lnum')],
                   ),
@@ -326,11 +351,12 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
               }
 
               // print('name ${item.name} - ${item.v} - $cellCnt');
+              Color cr = getErrCr(item.alertFlag, Colors.black);
 
               final txt = Text('${item.name}: ${item.v} ',
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                    color: item.alertFlag ? Colors.red : Colors.black,
+                    color: cr,
                     // fontFeatures: [FontFeature.tabularFigures()],
                     // fontFeatures: [FontFeature.enable('lnum')],
                   ));

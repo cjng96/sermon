@@ -9,10 +9,20 @@ import psutil
 import re
 import subprocess
 import traceback
+from enum import Enum
 
 # import aiohttp
 # from aiohttp import web
 
+class WarningStatus(Enum):
+    NORMAL = "n"
+    WARNING = "w"
+    ERROR = "e"
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.value.lower() == other.lower()
+        return super().__eq__(other)
 
 def main():
     if len(sys.argv) < 2:
@@ -95,7 +105,7 @@ def main():
                                 ss = fp.read()
                             st = json.loads(ss)
                         except Exception as e:
-                            st = dict(err=dict(v=str(e), alertFlag=True))
+                            st = dict(err=dict(v=str(e), alertFlag=WarningStatus.ERROR.value))
 
                         result["apps"][item["name"]] = st
                     else:
@@ -103,7 +113,7 @@ def main():
                         raise Exception(f"unknown dict type[{tt}]")
 
                 else:
-                    result["err"] = dict(v="unknown monitor data type[%s]!!" % type(item), alertFlag=True)
+                    result["err"] = dict(v="unknown monitor data type[%s]!!" % type(item), alertFlag=WarningStatus.ERROR.value)
 
             log.write("result %s\n" % json.dumps(result))
             print(json.dumps(result))
