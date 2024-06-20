@@ -13,6 +13,7 @@ import traceback
 from aiohttp import web
 import aiohttp_cors
 import async_timeout
+from enum import Enum
 
 from coSsh import CoSsh
 from coLog import glog, Error
@@ -28,6 +29,17 @@ g_cfg = {}
 """
 http post localhost:25090/cmd type=status
 """
+
+# TODO: helper.py 와 sermon.py에 있는 WarningStatus를 어떻게 깔끔하게 처리할지?
+class WarningStatus(Enum):
+    NORMAL = "n"
+    WARNING = "w"
+    ERROR = "e"
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.value.lower() == other.lower()
+        return super().__eq__(other)
 
 
 class MyCoSsh(CoSsh):
@@ -100,7 +112,6 @@ class Server:
           - name: cpu
             v: 99%
             alertFlag: True
-            alertLevel: 2
 
         groups:
           - name: engt
@@ -108,11 +119,9 @@ class Server:
               - name: err
                 v: Error occurs
                 alertFlag: True
-                alertLevel: 1
               - name: ts
                 v: 00:21
                 alertFlag: False
-                alertLevel: 0
 
         """
         items = []
@@ -129,56 +138,53 @@ class Server:
                     items.append(dict(name="newline", type="sp"))
                 elif item == "cpu":
                     items.append(
-                        dict(name=item, v="%.1f%%" % vv, alertFlag=False, alertLevel=0)
+                        dict(name=item, v="%.1f%%" % vv, alertFlag=WarningStatus.NORMAL.value)
                     )  # vv > 80))
                 elif item == "load":
                     avg = vv["avg"]
                     st = "[%d] %.1f,%.1f,%.1f" % (vv["cnt"], avg[0], avg[1], avg[2])
-                    alertFlag = avg[1] > vv["cnt"] * 0.8  # 10분간 80%이상
 
-                    alertLevel = 0
-                    if avg[1] > vv["cnt"] * 0.9:
-                        alertLevel = 2
-                    elif avg[1] > vv["cnt"] * 0.8:
-                        alertLevel = 1
-
-                    items.append(dict(name=item, v=st, alertFlag=alertFlag, alertLevel=alertLevel))
+                    alertFlag = WarningStatus.NORMAL.value
+                    if avg[1] > vv["cnt"] * 0.8:    # 10분간 80%이상
+                       alertFlag = WarningStatus.WARNING.value
+                    elif avg[1] > vv["cnt"] * 0.9:  # 10분간 90%이상
+                        alertFlag = WarningStatus.ERROR.value
+                    items.append(dict(name=item, v=st, alertFlag=alertFlag))
                 elif item == "mem":
                     st = "%d%%(%dMB)" % (vv["percent"], int(vv["total"] / 1024 / 1024))
-                    alertLevel = 0
+                    alertFlag = WarningStatus.NORMAL.value
                     if vv["percent"] > 95:
-                        alertLevel = 2
+                        alertFlag = WarningStatus.ERROR.value
                     elif vv["percent"] > 90:
-                        alertLevel =1
+                        alertFlag = WarningStatus.WARNING.value
 
-                    items.append(dict(name=item, v=st, alertFlag=vv["percent"] > 90, alertLevel=alertLevel))
+                    items.append(dict(name=item, v=st, alertFlag=alertFlag))
                 elif item == "swap":
                     st = "%d%%(%dMB)" % (vv["percent"], int(vv["total"] / 1024 / 1024))
-                    alertLevel = 0
+                    alertFlag = WarningStatus.NORMAL.value
                     if vv["percent"] > 95:
-                        alertLevel = 2
+                        alertFlag = WarningStatus.ERROR.value
                     elif vv["percent"] > 90:
-                        alertLevel = 1
+                        alertFlag = WarningStatus.WARNING.value
 
-                    items.append(dict(name=item, v=st, alertFlag=vv["percent"] > 90, alertLevel=alertLevel))
+                    items.append(dict(name=item, v=st, alertFlag=alertFlag))
                 elif item == "disk":
                     st = "%dG/%dG" % (
                         vv["used"] / 1024 / 1024 / 1024,
                         vv["total"] / 1024 / 1024 / 1024,
                     )
 
-                    alertLevel = 0
-                    if vv["free"] < 1024 * 1024 * 1:
-                        alertLevel = 2
-                    elif vv["free"] < 1024 * 1024 * 5:
-                        alertLevel = 1
+                    alertFlag = WarningStatus.NORMAL.value
+                    if vv["free"] < 1024 * 1024 * 1024 * 1:
+                        alertFlag = WarningStatus.ERROR.value
+                    elif vv["free"] < 1024 * 1024 * 1024 * 5:
+                        alertFlag = WarningStatus.WARNING.value
 
                     items.append(
                         dict(
                             name=item,
                             v=st,
-                            alertFlag=vv["free"] < 1024 * 1024 * 1024 * 5,
-                            alertLevel = alertLevel
+                            alertFlag=alertFlag
                         )
                     )
                 else:
@@ -195,18 +201,17 @@ class Server:
                         vv["total"] / 1024 / 1024 / 1024,
                     )
 
-                    alertLevel = 0
-                    if vv["free"] < 1024 * 1024 * 1:
-                        alertLevel = 2
-                    elif vv["free"] < 1024 * 1024 * 5:
-                        alertLevel = 1
+                    alertFlag = WarningStatus.NORMAL.value
+                    if vv["free"] < 1024 * 1024 * 1024 * 1:
+                        alertFlag = WarningStatus.ERROR.value
+                    elif vv["free"] < 1024 * 1024 * 1024 * 5:
+                        alertFlag = WarningStatus.WARNING.value
 
                     items.append(
                         dict(
                             name=name,
                             v=st,
-                            alertFlag=vv["free"] < 1024 * 1024 * 1024 * 5,
-                            alertLevel=alertLevel
+                            alertFlag=alertFlag
                         )
                     )
                 elif tt == "mdadm":
@@ -215,12 +220,12 @@ class Server:
 
                     st = "%d/%d" % (vv["act"], vv["tot"])
 
-                    alertLevel = 0
+                    alertFlag = WarningStatus.NORMAL.value
                     if vv["act"] != vv["tot"]:
-                        alertLevel = 2
+                        alertFlag = WarningStatus.ERROR.value
 
                     items.append(
-                        dict(name=name, v=st, alertFlag=vv["act"] != vv["tot"], alertLevel=alertLevel)
+                        dict(name=name, v=st, alertFlag=alertFlag)
                     )
 
                 elif tt == "app":
@@ -233,11 +238,11 @@ class Server:
                     if ts is not None:
                         now = time.time()
                         gap = now - ts
-                        alertLevel = 0
+                        alertFlag = WarningStatus.NORMAL.value
                         if gap > 60:
-                            alertLevel = 2
+                            alertFlag = WarningStatus.ERROR.value
                         lst.append(
-                            dict(name="ts", v=tsGap2str(gap), alertFlag=gap > 60, alertLevel=alertLevel)
+                            dict(name="ts", v=tsGap2str(gap), alertFlag=alertFlag)
                         )
 
                     for key in vv:
@@ -246,29 +251,26 @@ class Server:
                             continue
                         elif key == "arr":
                             for node in item:
-                                alertFlag = node.get("alertFlag", False)
-                                alertLevel = node.get("alertLevel", 0)
+                                alertFlag = getAlertFlag(node)
                                 lst.append(
                                     dict(
                                         name=node["n"],
                                         v=str(node["v"]),
-                                        alertFlag=alertFlag,
-                                        alertLevel=alertLevel
+                                        alertFlag=alertFlag
                                     )
                                 )
                         else:
                             if type(item) is dict:
                                 # alertFlag = item["alertFlag"] if "alertFlag" in item else False
-                                alertFlag = item.get("alertFlag", False)
-                                alertLevel = item.get("alertLevel", 0)
+                                alertFlag = getAlertFlag(item)
                                 lst.append(
                                     dict(
-                                        name=key, v=str(item["v"]), alertFlag=alertFlag, alertLevel=alertLevel
+                                        name=key, v=str(item["v"]), alertFlag=alertFlag
                                     )
                                 )
                             else:
                                 # old style
-                                lst.append(dict(name=key, v=str(item), alertFlag=False, alertLevel=0))
+                                lst.append(dict(name=key, v=str(item), alertFlag=WarningStatus.NORMAL.value))
 
                     groups.append(dict(name=name, items=lst))
 
@@ -497,16 +499,15 @@ async def checkLoop():
             notiCtx += "<br><br>%s - " % ser["name"]
 
             for item in ser["items"]:
-                alertFlag = item.get("alertFlag", False)
-                alertLevel = item.get("alertLevel", 0)
-                fontColor = getErrCrForAlertFlag(alertFlag, alertLevel, 'black')
+                alertFlag = getAlertFlag(item)
+                fontColor = getErrCr(alertFlag, "black")
                 notiCtx += '<span style="color: %s;">%s(%s),</span>&nbsp;' % (
                             fontColor,
                             item["name"],
                             item["v"],
                         )
 
-                if alertFlag or alertLevel > 0:
+                if alertFlag == WarningStatus.ERROR.value:
                     name = "%s/%s" % (ser["name"], item["name"])
                     if _errNew(name):
                         print("new err - %s" % name)
@@ -517,15 +518,14 @@ async def checkLoop():
                 notiCtx += "<br>&nbsp;&nbsp;%s - " % group["name"]
 
                 for item in group["items"]:
-                    alertFlag = item.get("alertFlag", False)
-                    alertLevel = item.get("alertLevel", 0)
-                    fontColor = getErrCrForAlertFlag(alertFlag, alertLevel, 'black')
+                    alertFlag = getAlertFlag(item)
+                    fontColor = getErrCr(alertFlag, "black")
                     notiCtx += '<span style="color: %s;">%s(%s),</span>&nbsp;' % (
                             fontColor,
                             item["name"],
                             item["v"],
                         )
-                    if alertFlag or alertLevel > 0:
+                    if alertFlag == WarningStatus.ERROR.value:
                         name = "%s/%s/%s" % (ser["name"], group["name"], item["name"])
                         if _errNew(name):
                             print("new err - %s" % (name))
@@ -563,7 +563,6 @@ async def checkLoop():
       - name: cpu
         v: 99%
         alertFlag: True
-        alertLevel: 2
 
     groups:
       - name: engt
@@ -571,11 +570,9 @@ async def checkLoop():
           - name: err
             v: Error occurs
             alertFlag: True
-            alertLevel: 1
           - name: ts
             v: 00:21
             alertFlag: False
-            alertLevel: 0
 """
 
 

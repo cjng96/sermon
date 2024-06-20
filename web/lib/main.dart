@@ -38,11 +38,10 @@ class ServerStatusPage extends StatefulWidget {
 }
 
 class StItem {
-  StItem(this.name, this.alertFlag, this.alertLevel, this.type, this.v);
+  StItem(this.name, this.alertFlag, this.type, this.v);
   factory StItem.fromJson(Map<String, dynamic> json) => StItem(
         json['name'] as String,
-        json['alertFlag'] as bool? ?? false,
-        json['alertLevel'] as int? ?? 0,
+        json['alertFlag'] as String? ?? 'n',
         json['type'] as String? ?? '',
         json['v'] as String? ?? '', // name:newline, type:sp의 경우 v가 없다
       );
@@ -50,14 +49,12 @@ class StItem {
         'name': name,
         'type': type,
         'alertFlag': alertFlag,
-        'alertLevel': alertLevel,
         'v': v,
       };
 
   String name;
   String type; // ''(일반적), 'sp'(newline등)
-  bool alertFlag;
-  int alertLevel;
+  String alertFlag;
   String v;
 }
 
@@ -129,37 +126,14 @@ String duration2str(Duration d) {
 }
 
 // alertLevel별 알맞는 색상 추출
-Color getErrCr(int alertLevel, Color defaultColor) {
-  if (alertLevel >= 2) {
+Color getErrCr(String alertFlag, Color defaultColor) {
+  if (alertFlag == "e" || alertFlag == "E") {
     return Colors.red;
-  } else if (alertLevel == 1) {
+  } else if (alertFlag == "w" || alertFlag == "W") {
     return Colors.orange;
   } else {
     return defaultColor;
   }
-}
-
-// alertFlag와 호환을 위한 색상 추출 함수
-// @Depreciate:  alertFlag가 alertLevel로 완전히 대체되면 사라질 함수
-Color getErrCrForAlertFlag(bool alertFlag, int alertLevel, Color defaultColor) {
-  Color cr = defaultColor;
-  if (alertFlag || alertLevel > 0) {
-    // alertFlag와 alertLevel 둘 다 있는 경우 - alertLevel 사용
-    if (alertFlag && alertLevel > 0) {
-      cr = getErrCr(alertLevel, defaultColor);
-    }
-
-    // alertFlag만 있는 경우 - alertFlag 사용
-    if (alertFlag && alertLevel == 0) {
-      cr = Colors.red;
-    }
-
-    // alertLevel만 있는 경우 - alertLevel 사용
-    if (!alertFlag && alertLevel > 0) {
-      cr = getErrCr(alertLevel, defaultColor);
-    }
-  }
-  return cr;
 }
 
 class _ServerStatusPageState extends State<ServerStatusPage> {
@@ -279,7 +253,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                     final percent = int.parse(m.group(1)!);
                     final total = m.group(2);
 
-                    Color cr = getErrCrForAlertFlag(item.alertFlag, item.alertLevel, Colors.blue.withAlpha(40));
+                    Color cr = getErrCr(item.alertFlag, Colors.blue.withAlpha(40));
                     w = LinearPercentIndicator(
                       width: 150.0,
                       animation: true,
@@ -304,7 +278,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
                   if (m != null) {
                     final used = int.parse(m.group(1)!);
                     final total = int.parse(m.group(2)!);
-                    Color cr = getErrCrForAlertFlag(item.alertFlag, item.alertLevel, Colors.blue.withAlpha(40));
+                    Color cr = getErrCr(item.alertFlag, Colors.blue.withAlpha(40));
                     w = LinearPercentIndicator(
                       width: 150.0,
                       animation: true,
@@ -324,7 +298,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
               }
 
               if (w == null) {
-                Color cr = getErrCrForAlertFlag(item.alertFlag, item.alertLevel, Colors.black);
+                Color cr = getErrCr(item.alertFlag, Colors.black);
 
                 w = Text(
                   '${item.name}: ${item.v} ',
@@ -366,8 +340,7 @@ class _ServerStatusPageState extends State<ServerStatusPage> {
               }
 
               // print('name ${item.name} - ${item.v} - $cellCnt');
-
-              Color cr = getErrCrForAlertFlag(item.alertFlag, item.alertLevel, Colors.black);
+              Color cr = getErrCr(item.alertFlag, Colors.black);
 
               final txt = Text('${item.name}: ${item.v} ',
                   textAlign: TextAlign.left,
