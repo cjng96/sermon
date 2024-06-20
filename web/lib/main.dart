@@ -13,6 +13,17 @@ import 'package:percent_indicator/percent_indicator.dart';
 
 import 'platformOther.dart' if (kIsWeb) 'platformWeb.dart';
 
+enum WarningStatus {
+  ERROR('e', 'E'), // 바로 초치해야하는 수준
+  WARNING('w', 'W'), // 당장 문제는 없지만 예의주시
+  NORMAL('n', 'N'); // 정상
+
+  final String lowerCaseValue;
+  final String upperCaseValue;
+
+  const WarningStatus(this.lowerCaseValue, this.upperCaseValue);
+}
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -41,7 +52,7 @@ class StItem {
   StItem(this.name, this.alertFlag, this.type, this.v);
   factory StItem.fromJson(Map<String, dynamic> json) => StItem(
         json['name'] as String,
-        json['alertFlag'] as String? ?? 'n',
+        json['alertFlag'] as String? ?? WarningStatus.NORMAL.lowerCaseValue,
         json['type'] as String? ?? '',
         json['v'] as String? ?? '', // name:newline, type:sp의 경우 v가 없다
       );
@@ -127,9 +138,9 @@ String duration2str(Duration d) {
 
 // alertLevel별 알맞는 색상 추출
 Color getErrCr(String alertFlag, Color defaultColor) {
-  if (alertFlag == "e" || alertFlag == "E") {
+  if (alertFlag == WarningStatus.ERROR.lowerCaseValue || alertFlag == WarningStatus.ERROR.upperCaseValue) {
     return Colors.red;
-  } else if (alertFlag == "w" || alertFlag == "W") {
+  } else if (alertFlag == WarningStatus.WARNING.lowerCaseValue || alertFlag == WarningStatus.WARNING.upperCaseValue) {
     return Colors.orange;
   } else {
     return defaultColor;
