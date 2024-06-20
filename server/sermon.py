@@ -175,9 +175,11 @@ class Server:
                     )
 
                     alertFlag = WarningStatus.NORMAL.value
-                    if vv["free"] < 1024 * 1024 * 1024 * 1:
+                    free_percentage = (vv["free"] / vv["total"]) * 100
+
+                    if free_percentage < 5:
                         alertFlag = WarningStatus.ERROR.value
-                    elif vv["free"] < 1024 * 1024 * 1024 * 5:
+                    elif free_percentage < 10:
                         alertFlag = WarningStatus.WARNING.value
 
                     items.append(
@@ -202,9 +204,11 @@ class Server:
                     )
 
                     alertFlag = WarningStatus.NORMAL.value
-                    if vv["free"] < 1024 * 1024 * 1024 * 1:
+                    free_percentage = (vv["free"] / vv["total"]) * 100
+
+                    if free_percentage < 5:
                         alertFlag = WarningStatus.ERROR.value
-                    elif vv["free"] < 1024 * 1024 * 1024 * 5:
+                    elif free_percentage < 10:
                         alertFlag = WarningStatus.WARNING.value
 
                     items.append(
